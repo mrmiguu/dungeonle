@@ -1,8 +1,7 @@
 import { CSSProperties, useEffect, useMemo, useRef, useState } from 'react'
 import { Flipper, Flipped } from 'react-flip-toolkit'
 import toast, { Toaster } from 'react-hot-toast'
-import useKeyPress from 'react-use/lib/useKeyPress'
-import { useDocumentTouch } from './appHooks'
+import { useGenericDocumentInput } from './appHooks'
 
 import { stringify } from './utils'
 
@@ -12,25 +11,20 @@ function App() {
   const [cameraPosition, setCameraPosition] = useState<[number, number]>([0, 0])
   const [cameraX, cameraY] = cameraPosition
 
-  const { swipedUpTimestamp, swipedLeftTimestamp, swipedDownTimestamp, swipedRightTimestamp } = useDocumentTouch()
-
-  const [key_ArrowUp] = useKeyPress('ArrowUp')
-  const [key_ArrowLeft] = useKeyPress('ArrowLeft')
-  const [key_ArrowDown] = useKeyPress('ArrowDown')
-  const [key_ArrowRight] = useKeyPress('ArrowRight')
+  const { inputUpTimestamp, inputLeftTimestamp, inputDownTimestamp, inputRightTimestamp } = useGenericDocumentInput()
 
   useEffect(() => {
-    if (key_ArrowUp || swipedUpTimestamp) setCameraPosition(([cx, cy]) => [cx, cy - 1])
-  }, [key_ArrowUp, swipedUpTimestamp])
+    if (inputUpTimestamp) setCameraPosition([cameraX, cameraY - 1])
+  }, [inputUpTimestamp])
   useEffect(() => {
-    if (key_ArrowLeft || swipedLeftTimestamp) setCameraPosition(([cx, cy]) => [cx - 1, cy])
-  }, [key_ArrowLeft, swipedLeftTimestamp])
+    if (inputLeftTimestamp) setCameraPosition([cameraX - 1, cameraY])
+  }, [inputLeftTimestamp])
   useEffect(() => {
-    if (key_ArrowDown || swipedDownTimestamp) setCameraPosition(([cx, cy]) => [cx, cy + 1])
-  }, [key_ArrowDown, swipedDownTimestamp])
+    if (inputDownTimestamp) setCameraPosition([cameraX, cameraY + 1])
+  }, [inputDownTimestamp])
   useEffect(() => {
-    if (key_ArrowRight || swipedRightTimestamp) setCameraPosition(([cx, cy]) => [cx + 1, cy])
-  }, [key_ArrowRight, swipedRightTimestamp])
+    if (inputRightTimestamp) setCameraPosition([cameraX + 1, cameraY])
+  }, [inputRightTimestamp])
 
   const mapCSS: CSSProperties = {
     left: `${-100 * cameraX}%`,
@@ -72,10 +66,10 @@ function App() {
       <pre>
         {stringify(
           {
-            swipedUpTimestamp,
-            swipedLeftTimestamp,
-            swipedDownTimestamp,
-            swipedRightTimestamp,
+            inputUpTimestamp,
+            inputLeftTimestamp,
+            inputDownTimestamp,
+            inputRightTimestamp,
             cameraPosition,
           },
           null,
