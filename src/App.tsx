@@ -2,65 +2,17 @@ import { CSSProperties, useEffect, useMemo, useRef, useState } from 'react'
 import { Flipper, Flipped } from 'react-flip-toolkit'
 import toast, { Toaster } from 'react-hot-toast'
 import useKeyPress from 'react-use/lib/useKeyPress'
+import { useDocumentTouch } from './appHooks'
 
-import { abs, stringify } from './utils'
+import { stringify } from './utils'
 
 function App() {
   const [mapWidth, mapHeight] = useMemo(() => [8, 4], [])
 
-  const touchStartRef = useRef<Pick<TouchList[number], 'identifier' | 'clientX' | 'clientY'> | null>(null)
-  const [swipeDistance, setSwipeDistance] = useState<[number, number]>([0, 0])
-  const [swipeDX, swipeDY] = swipeDistance
-
-  const swipeThreshold = 32
-  const isSwipeHorizontal = abs(swipeDX) > swipeThreshold && abs(swipeDX) > abs(swipeDY)
-  const isSwipeVertical = abs(swipeDY) > swipeThreshold && abs(swipeDX) < abs(swipeDY)
-  const isSwipeUp = isSwipeVertical && swipeDY < 0
-  const isSwipeLeft = isSwipeHorizontal && swipeDX < 0
-  const isSwipeDown = isSwipeVertical && swipeDY > 0
-  const isSwipeRight = isSwipeHorizontal && swipeDX > 0
-
   const [cameraPosition, setCameraPosition] = useState<[number, number]>([0, 0])
   const [cameraX, cameraY] = cameraPosition
 
-  useEffect(() => {
-    function onTouchStart(e: TouchEvent) {
-      const { identifier, clientX, clientY } = e.touches[0]!
-      touchStartRef.current = { identifier, clientX, clientY }
-    }
-
-    document.addEventListener('touchstart', onTouchStart, { passive: false })
-    return () => {
-      document.removeEventListener('touchstart', onTouchStart)
-    }
-  }, [])
-
-  useEffect(() => {
-    function onTouchMove(e: TouchEvent) {
-      e.preventDefault()
-    }
-
-    document.addEventListener('touchmove', onTouchMove, { passive: false })
-    return () => {
-      document.removeEventListener('touchmove', onTouchMove)
-    }
-  }, [])
-
-  useEffect(() => {
-    function onTouchEnd(e: TouchEvent) {
-      const { identifier, clientX, clientY } = e.changedTouches[0]!
-      const touchStart = touchStartRef.current
-
-      if (!touchStart || touchStart.identifier !== identifier) return
-
-      setSwipeDistance([clientX - touchStart.clientX, clientY - touchStart.clientY])
-    }
-
-    document.addEventListener('touchend', onTouchEnd, { passive: false })
-    return () => {
-      document.removeEventListener('touchend', onTouchEnd)
-    }
-  }, [])
+  const { swipedUpTimestamp, swipedLeftTimestamp, swipedDownTimestamp, swipedRightTimestamp } = useDocumentTouch()
 
   const [key_ArrowUp] = useKeyPress('ArrowUp')
   const [key_ArrowLeft] = useKeyPress('ArrowLeft')
@@ -68,17 +20,17 @@ function App() {
   const [key_ArrowRight] = useKeyPress('ArrowRight')
 
   useEffect(() => {
-    if (key_ArrowUp || isSwipeUp) setCameraPosition(([cx, cy]) => [cx, cy - 1])
-  }, [key_ArrowUp, swipeDistance])
+    if (key_ArrowUp || swipedUpTimestamp) setCameraPosition(([cx, cy]) => [cx, cy - 1])
+  }, [key_ArrowUp, swipedUpTimestamp])
   useEffect(() => {
-    if (key_ArrowLeft || isSwipeLeft) setCameraPosition(([cx, cy]) => [cx - 1, cy])
-  }, [key_ArrowLeft, swipeDistance])
+    if (key_ArrowLeft || swipedLeftTimestamp) setCameraPosition(([cx, cy]) => [cx - 1, cy])
+  }, [key_ArrowLeft, swipedLeftTimestamp])
   useEffect(() => {
-    if (key_ArrowDown || isSwipeDown) setCameraPosition(([cx, cy]) => [cx, cy + 1])
-  }, [key_ArrowDown, swipeDistance])
+    if (key_ArrowDown || swipedDownTimestamp) setCameraPosition(([cx, cy]) => [cx, cy + 1])
+  }, [key_ArrowDown, swipedDownTimestamp])
   useEffect(() => {
-    if (key_ArrowRight || isSwipeRight) setCameraPosition(([cx, cy]) => [cx + 1, cy])
-  }, [key_ArrowRight, swipeDistance])
+    if (key_ArrowRight || swipedRightTimestamp) setCameraPosition(([cx, cy]) => [cx + 1, cy])
+  }, [key_ArrowRight, swipedRightTimestamp])
 
   const mapCSS: CSSProperties = {
     left: `${-100 * cameraX}%`,
@@ -120,13 +72,10 @@ function App() {
       <pre>
         {stringify(
           {
-            swipeDistance,
-            isSwipeHorizontal,
-            isSwipeVertical,
-            isSwipeUp,
-            isSwipeLeft,
-            isSwipeDown,
-            isSwipeRight,
+            swipedUpTimestamp,
+            swipedLeftTimestamp,
+            swipedDownTimestamp,
+            swipedRightTimestamp,
             cameraPosition,
           },
           null,
