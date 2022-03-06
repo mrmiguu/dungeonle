@@ -132,20 +132,19 @@ function useGenericDocumentInput() {
     if (touchedTimestamp || pressedTimestamp) setInputTimestamp(max(touchedTimestamp, pressedTimestamp))
   }, [touchedTimestamp, pressedTimestamp])
   useEffect(() => {
-    if (swipedUpTimestamp || pressedUpTimestamp) setInputUpTimestamp(max(swipedUpTimestamp, pressedUpTimestamp))
-  }, [swipedUpTimestamp, pressedUpTimestamp])
+    if (swipedDownTimestamp || pressedUpTimestamp) setInputUpTimestamp(max(swipedDownTimestamp, pressedUpTimestamp))
+  }, [swipedDownTimestamp, pressedUpTimestamp])
   useEffect(() => {
-    if (swipedLeftTimestamp || pressedLeftTimestamp)
-      setInputLeftTimestamp(max(swipedLeftTimestamp, pressedLeftTimestamp))
-  }, [swipedLeftTimestamp, pressedLeftTimestamp])
+    if (swipedRightTimestamp || pressedLeftTimestamp)
+      setInputLeftTimestamp(max(swipedRightTimestamp, pressedLeftTimestamp))
+  }, [swipedRightTimestamp, pressedLeftTimestamp])
   useEffect(() => {
-    if (swipedDownTimestamp || pressedDownTimestamp)
-      setInputDownTimestamp(max(swipedDownTimestamp, pressedDownTimestamp))
-  }, [swipedDownTimestamp, pressedDownTimestamp])
+    if (swipedUpTimestamp || pressedDownTimestamp) setInputDownTimestamp(max(swipedUpTimestamp, pressedDownTimestamp))
+  }, [swipedUpTimestamp, pressedDownTimestamp])
   useEffect(() => {
-    if (swipedRightTimestamp || pressedRightTimestamp)
-      setInputRightTimestamp(max(swipedRightTimestamp, pressedRightTimestamp))
-  }, [swipedRightTimestamp, pressedRightTimestamp])
+    if (swipedLeftTimestamp || pressedRightTimestamp)
+      setInputRightTimestamp(max(swipedLeftTimestamp, pressedRightTimestamp))
+  }, [swipedLeftTimestamp, pressedRightTimestamp])
 
   return {
     inputTimestamp,
