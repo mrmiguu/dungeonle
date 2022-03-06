@@ -7,4 +7,10 @@ const { abs, min, max, sqrt, PI, pow } = Math
 
 const sleep = (...args: Tail<Parameters<typeof setTimeout>>) => new Promise(resolve => setTimeout(resolve, ...args))
 
-export { log, warn, error, parse, stringify, keys, values, entries, abs, min, max, sqrt, PI, pow, sleep }
+const unicode = (str: string, pos = 0): string[] => {
+  const hex = str.codePointAt(pos)?.toString(16).toUpperCase()
+  if (hex) return [hex, ...unicode(str, pos + 1)]
+  else return []
+}
+
+export { log, warn, error, parse, stringify, keys, values, entries, abs, min, max, sqrt, PI, pow, sleep, unicode }

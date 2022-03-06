@@ -1,8 +1,10 @@
-import { CSSProperties, useEffect, useMemo, useRef, useState } from 'react'
+import { CSSProperties, useEffect, useMemo, useState } from 'react'
 import { Flipper, Flipped } from 'react-flip-toolkit'
 import toast, { Toaster } from 'react-hot-toast'
-import { useGenericDocumentInput } from './appHooks'
 
+import { useGenericDocumentInput } from './appHooks'
+import EmojiMonster from './EmojiMonster'
+import { emojis } from './emojis'
 import { stringify } from './utils'
 
 function App() {
@@ -11,8 +13,12 @@ function App() {
   const [cameraPosition, setCameraPosition] = useState<[number, number]>([0, 0])
   const [cameraX, cameraY] = cameraPosition
 
-  const { inputUpTimestamp, inputLeftTimestamp, inputDownTimestamp, inputRightTimestamp } = useGenericDocumentInput()
+  const { inputTimestamp, inputUpTimestamp, inputLeftTimestamp, inputDownTimestamp, inputRightTimestamp } =
+    useGenericDocumentInput()
 
+  useEffect(() => {
+    if (inputTimestamp) toast('4625')
+  }, [inputTimestamp])
   useEffect(() => {
     if (inputUpTimestamp) setCameraPosition([cameraX, cameraY - 1])
   }, [inputUpTimestamp])
@@ -44,13 +50,21 @@ function App() {
           <div className="absolute w-full h-full bg-green-500" style={mapCSS}>
             {[...Array(mapHeight)].map((_, y) => (
               <div key={`${y}`} className="flex bg-red-500" style={mapRowCSS}>
-                {[...Array(mapWidth)].map((_, x) => (
-                  <div
-                    key={`${x}`}
-                    className="w-full h-full shrink-0 bg-green-400 outline-dotted"
-                    onClick={() => toast(`Clicked tile ${stringify([x, y])}`)}
-                  ></div>
-                ))}
+                {[...Array(mapWidth)].map((_, x) => {
+                  const emoji = emojis[(y * mapWidth + x) % emojis.length]!
+
+                  return (
+                    <div
+                      key={`${x}`}
+                      className="relative w-full h-full shrink-0 flex justify-center items-center bg-green-400 outline-dotted"
+                      onClick={() => toast(`Clicked tile ${stringify([x, y])}`)}
+                    >
+                      <div className="flex justify-center items-end">
+                        <EmojiMonster emoji={emoji} className="absolute text-9xl" />
+                      </div>
+                    </div>
+                  )
+                })}
               </div>
             ))}
           </div>

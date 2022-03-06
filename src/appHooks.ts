@@ -5,12 +5,13 @@ import { abs, max } from './utils'
 
 function useDocumentTouch() {
   const touchStartRef = useRef<Pick<TouchList[number], 'identifier' | 'clientX' | 'clientY'> | null>(null)
+  const [touchedTimestamp, setTouchedTimestamp] = useState(0)
   const [swipedUpTimestamp, setSwipedUpTimestamp] = useState(0)
   const [swipedLeftTimestamp, setSwipedLeftTimestamp] = useState(0)
   const [swipedDownTimestamp, setSwipedDownTimestamp] = useState(0)
   const [swipedRightTimestamp, setSwipedRightTimestamp] = useState(0)
 
-  function onSwipe(swipeDX: number, swipeDY: number) {
+  function onTouch(swipeDX: number, swipeDY: number) {
     const swipeThreshold = 32
 
     const swipedHorizontally = abs(swipeDX) > swipeThreshold && abs(swipeDX) > abs(swipeDY)
@@ -22,9 +23,10 @@ function useDocumentTouch() {
     const swipedRightTimestamp = swipedHorizontally && swipeDX > 0
 
     if (swipedUpTimestamp) setSwipedUpTimestamp(Date.now())
-    if (swipedLeftTimestamp) setSwipedLeftTimestamp(Date.now())
-    if (swipedDownTimestamp) setSwipedDownTimestamp(Date.now())
-    if (swipedRightTimestamp) setSwipedRightTimestamp(Date.now())
+    else if (swipedLeftTimestamp) setSwipedLeftTimestamp(Date.now())
+    else if (swipedDownTimestamp) setSwipedDownTimestamp(Date.now())
+    else if (swipedRightTimestamp) setSwipedRightTimestamp(Date.now())
+    else setTouchedTimestamp(Date.now())
   }
 
   useEffect(() => {
@@ -57,7 +59,7 @@ function useDocumentTouch() {
 
       if (!touchStart || touchStart.identifier !== identifier) return
 
-      onSwipe(clientX - touchStart.clientX, clientY - touchStart.clientY)
+      onTouch(clientX - touchStart.clientX, clientY - touchStart.clientY)
     }
 
     document.addEventListener('touchend', onTouchEnd, { passive: false })
@@ -67,6 +69,7 @@ function useDocumentTouch() {
   }, [])
 
   return {
+    touchedTimestamp,
     swipedUpTimestamp,
     swipedLeftTimestamp,
     swipedDownTimestamp,
@@ -75,16 +78,22 @@ function useDocumentTouch() {
 }
 
 function useDocumentKeyPress() {
+  const [key_Enter] = useKeyPress('Enter')
+  const [key_Space] = useKeyPress(' ')
   const [key_ArrowUp] = useKeyPress('ArrowUp')
   const [key_ArrowLeft] = useKeyPress('ArrowLeft')
   const [key_ArrowDown] = useKeyPress('ArrowDown')
   const [key_ArrowRight] = useKeyPress('ArrowRight')
 
+  const [pressedTimestamp, setPressedTimestamp] = useState(0)
   const [pressedUpTimestamp, setPressedUpTimestamp] = useState(0)
   const [pressedLeftTimestamp, setPressedLeftTimestamp] = useState(0)
   const [pressedDownTimestamp, setPressedDownTimestamp] = useState(0)
   const [pressedRightTimestamp, setPressedRightTimestamp] = useState(0)
 
+  useEffect(() => {
+    if (key_Enter || key_Space) setPressedTimestamp(Date.now())
+  }, [key_Enter, key_Space])
   useEffect(() => {
     if (key_ArrowUp) setPressedUpTimestamp(Date.now())
   }, [key_ArrowUp])
@@ -99,6 +108,7 @@ function useDocumentKeyPress() {
   }, [key_ArrowRight])
 
   return {
+    pressedTimestamp,
     pressedUpTimestamp,
     pressedLeftTimestamp,
     pressedDownTimestamp,
@@ -107,15 +117,20 @@ function useDocumentKeyPress() {
 }
 
 function useGenericDocumentInput() {
-  const { swipedUpTimestamp, swipedLeftTimestamp, swipedDownTimestamp, swipedRightTimestamp } = useDocumentTouch()
-  const { pressedUpTimestamp, pressedLeftTimestamp, pressedDownTimestamp, pressedRightTimestamp } =
+  const { touchedTimestamp, swipedUpTimestamp, swipedLeftTimestamp, swipedDownTimestamp, swipedRightTimestamp } =
+    useDocumentTouch()
+  const { pressedTimestamp, pressedUpTimestamp, pressedLeftTimestamp, pressedDownTimestamp, pressedRightTimestamp } =
     useDocumentKeyPress()
 
+  const [inputTimestamp, setInputTimestamp] = useState(0)
   const [inputUpTimestamp, setInputUpTimestamp] = useState(0)
   const [inputLeftTimestamp, setInputLeftTimestamp] = useState(0)
   const [inputDownTimestamp, setInputDownTimestamp] = useState(0)
   const [inputRightTimestamp, setInputRightTimestamp] = useState(0)
 
+  useEffect(() => {
+    if (touchedTimestamp || pressedTimestamp) setInputTimestamp(max(touchedTimestamp, pressedTimestamp))
+  }, [touchedTimestamp, pressedTimestamp])
   useEffect(() => {
     if (swipedUpTimestamp || pressedUpTimestamp) setInputUpTimestamp(max(swipedUpTimestamp, pressedUpTimestamp))
   }, [swipedUpTimestamp, pressedUpTimestamp])
@@ -133,6 +148,7 @@ function useGenericDocumentInput() {
   }, [swipedRightTimestamp, pressedRightTimestamp])
 
   return {
+    inputTimestamp,
     inputUpTimestamp,
     inputLeftTimestamp,
     inputDownTimestamp,
