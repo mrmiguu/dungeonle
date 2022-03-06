@@ -46,8 +46,9 @@ function EmojiMonster({ emoji, className }: { emoji: string; className?: string 
 
   return (
     <div className={`${className}`}>
-      <div className="relative">
+      <div className="relative w-full h-full">
         {emojiSVG && <img className="w-full h-full" src={emojiSVG} alt="monster emoji" />}
+
         <div className="absolute left-0 top-0 w-full h-full flex justify-center items-center" style={faceOffset.style}>
           {elFace}
         </div>

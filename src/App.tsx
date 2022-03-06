@@ -60,7 +60,7 @@ function App() {
                       onClick={() => toast(`Clicked tile ${stringify([x, y])}`)}
                     >
                       <div className="flex justify-center items-end">
-                        <EmojiMonster emoji={emoji} className="absolute text-9xl" />
+                        <EmojiMonster emoji={emoji} className="absolute w-full h-full" />
                       </div>
                     </div>
                   )
