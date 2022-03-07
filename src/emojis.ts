@@ -133,7 +133,7 @@ const faceOverrides: {
   '🌲': {},
   '🪴': { x: -0.5, y: 21, eyeDistance: -6 },
   '🌷': { x: 16, y: 2, eyeDistance: -6 },
-  '🌼': { x: 8, y: -2 },
+  '🌼': { x: 8, y: -2, mouth: '7' },
   '🐚': { x: 3.5, y: 4, eyeDistance: -6 },
   '🐣': { y: 20 },
   '🛌': { y: -2 },
