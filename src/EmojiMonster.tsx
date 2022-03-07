@@ -3,15 +3,23 @@ import useAsync from 'react-use/lib/useAsync'
 import seedrandom from 'seedrandom'
 
 import BlackBeadyEye from './BlackBeadyEye'
-import { faceOffsets, openmoji_svg_color } from './emojis'
-import { abs, keys, log, stringify, unicode } from './utils'
-import Mouth, { mouths } from './Mouth'
+import { faceOverrides, FaceOverride, openmoji_svg_color } from './emojis'
+import { abs, keys, log, sleep, stringify, unicode } from './utils'
+import Mouth from './Mouth'
+import { mouths } from './mouths'
 
 function EmojiMonster({ emoji, className }: { emoji: string; className?: string }) {
+  const pendingAnimationDelay = useAsync(async () => {
+    const random = seedrandom(emoji)
+    await sleep(~~(random() * 3000))
+  }, [emoji])
+
+  const faceOffset = faceOverrides[emoji as FaceOverride]
+
   const mouth = useMemo(() => {
     const { length } = mouths
     const random = seedrandom(emoji)
-    return mouths[~~abs(random() * length) % length]!
+    return faceOffset.mouth ?? mouths[~~abs(random() * length) % length]!
   }, [emoji])
 
   const pendingEmojiSVG = useAsync(async () => {
@@ -38,7 +46,6 @@ function EmojiMonster({ emoji, className }: { emoji: string; className?: string 
   }, [emoji])
 
   const emojiSVG = pendingEmojiSVG.value
-  const faceOffset = faceOffsets[emoji as keyof typeof faceOffsets]
 
   const elFaceNose = <div style={{ width: `${100 / 6 + (faceOffset.eyeDistance ?? 0)}%` }} />
   const elFaceEyes = (
@@ -58,7 +65,7 @@ function EmojiMonster({ emoji, className }: { emoji: string; className?: string 
 
   return (
     <div className={`${className}`}>
-      <div className="relative w-full h-full">
+      <div className={`relative w-full h-full origin-bottom ${!pendingAnimationDelay.loading && 'animate-breathe'}`}>
         {emojiSVG && <img className="w-full h-full" src={emojiSVG} alt="monster emoji" />}
 
         <div

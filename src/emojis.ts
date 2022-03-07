@@ -1,6 +1,31 @@
+import { MouthKind } from './mouths'
+
 const openmoji_svg_color = import.meta.glob('./openmoji-svg-color/*.svg')
 
 const emojis = [
+  // '🍳',
+  '🧀',
+  '🥯',
+  '🌰',
+  '🍞',
+  '🥜',
+  '🍄',
+  '🥦',
+  '🥬',
+  '🫑',
+  '🌶️',
+  '🌽',
+  '🥑',
+  '🥥',
+  '🥝',
+  '🫐',
+  '🍒',
+  '🍍',
+  '🍃',
+  '🍂',
+  '🍁',
+  '🍀',
+  '☘️',
   '🌵',
   '🌳',
   '🌲',
@@ -77,9 +102,32 @@ const emojis = [
   '🔒',
 ] as const
 
-const faceOffsets: {
-  [k in typeof emojis[number]]: Partial<{ x: number; y: number; eyeDistance: number }>
+const faceOverrides: {
+  [k in typeof emojis[number]]: Partial<{ x: number; y: number; eyeDistance: number; mouth: MouthKind }>
 } = {
+  // '🍳': {},
+  '🧀': { y: -17 },
+  '🥯': { x: -1, y: 12.5, eyeDistance: -6, mouth: '3' },
+  '🌰': { x: 2, y: 3, eyeDistance: -3 },
+  '🍞': { x: -20 },
+  '🥜': { x: -13, y: 15, eyeDistance: -5 },
+  '🍄': { x: -0.5, y: 16, eyeDistance: -7 },
+  '🥦': { y: -5 },
+  '🥬': { x: 3, y: -11, eyeDistance: -5 },
+  '🫑': { x: 6.5, y: 9.5 },
+  '🌶️': { x: 26, y: 1.5, eyeDistance: -10 },
+  '🌽': { x: -10.5, y: -6, eyeDistance: -5 },
+  '🥑': { x: 0.5, y: -18, eyeDistance: -9 },
+  '🥥': { x: -7, y: -7 },
+  '🥝': { y: 1, eyeDistance: -8 },
+  '🫐': { x: 14, y: 22 },
+  '🍒': { x: -10, y: 24, eyeDistance: -5 },
+  '🍍': { y: 17, x: -2, eyeDistance: -4 },
+  '🍃': { y: 1.5 },
+  '🍂': { x: -15, y: -9, eyeDistance: -5 },
+  '🍁': { y: 8 },
+  '🍀': { x: 4, y: -10, eyeDistance: -10 },
+  '☘️': { x: 2, y: -4, eyeDistance: -5 },
   '🌵': { eyeDistance: -10 },
   '🌳': { y: -13 },
   '🌲': {},
@@ -156,4 +204,7 @@ const faceOffsets: {
   '🔒': { y: 7 },
 } as const
 
-export { openmoji_svg_color, emojis, faceOffsets }
+type FaceOverride = keyof typeof faceOverrides
+
+export type { FaceOverride }
+export { openmoji_svg_color, emojis, faceOverrides }

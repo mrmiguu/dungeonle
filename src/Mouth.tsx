@@ -1,46 +1,6 @@
 import { CSSProperties } from 'react'
 
-const mouths = [
-  '3',
-  'D',
-  '<',
-  '>',
-  'O',
-  '(',
-  ')',
-  'X',
-  'E',
-  '~',
-  '!',
-  '#',
-  '`',
-  '4',
-  '2',
-  '1',
-  '6',
-  '7',
-  '8',
-  '9',
-  '-',
-  '+',
-  '=',
-  '{',
-  '}',
-  '[',
-  ']',
-  '\\',
-  '/',
-  '|',
-  ':',
-  ';',
-  "'",
-  '"',
-  '?',
-  '.',
-  ',',
-] as const
-
-type MouthKind = typeof mouths[number]
+import { MouthKind } from './mouths'
 
 function Mouth({ kind, className, style }: { kind: MouthKind; className?: string; style?: CSSProperties }) {
   return (
@@ -63,5 +23,3 @@ function Mouth({ kind, className, style }: { kind: MouthKind; className?: string
 }
 
 export default Mouth
-export type { MouthKind }
-export { mouths }
