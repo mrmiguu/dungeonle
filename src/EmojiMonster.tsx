@@ -33,7 +33,7 @@ function EmojiMonster({ emoji, className }: { emoji: string; className?: string 
     let lastValidUnicodePath: string | undefined = undefined
     for (const unicode of emojiUnicode.slice(1)) {
       for (const path of svgUnicodePaths) {
-        if (path.endsWith(`${unicodeBuffer}.svg`)) lastValidUnicodePath = path
+        if (path.endsWith(`/${unicodeBuffer}.svg`)) lastValidUnicodePath = path
       }
       unicodeBuffer += `-${unicode}`
     }
