@@ -1,18 +1,16 @@
 import { useMemo } from 'react'
 import useAsync from 'react-use/lib/useAsync'
 import BlackBeadyEye from './BlackBeadyEye'
-import { FaceOverride, faceOverrides, openmoji_svg_color } from './emojis'
+import { Emoji, FaceOverride, faceOverrides, openmoji_svg_color } from './emojis'
 import Mouth from './Mouth'
 import { mouths } from './mouths'
 import { random } from './random'
-import { abs, keys, log, sleep, stringify, unicode } from './utils'
+import { abs, keys, log, stringify, unicode } from './utils'
 
-type EmojiMonsterProps = { emoji: string; className?: string }
+type EmojiMonsterProps = { emoji: Emoji; className?: string }
 
 function EmojiMonster({ emoji, className }: EmojiMonsterProps) {
-  const pendingAnimationDelay = useAsync(async () => {
-    await sleep(~~(random(emoji) * 3000))
-  }, [emoji])
+  const uniqueAnimationTimeOffset = useMemo(() => ~~(random(emoji) * 3000), [emoji])
 
   const faceOffset = faceOverrides[emoji as FaceOverride]
 
@@ -64,7 +62,10 @@ function EmojiMonster({ emoji, className }: EmojiMonsterProps) {
 
   const el = (
     <div className={`${className}`}>
-      <div className={`relative w-full h-full origin-bottom ${!pendingAnimationDelay.loading && 'animate-breathe'}`}>
+      <div
+        className="relative w-full h-full origin-bottom animate-breathe"
+        style={{ animationDelay: `${-uniqueAnimationTimeOffset}ms` }}
+      >
         {emojiSVG && <img className="w-full h-full" src={emojiSVG} alt="monster emoji" />}
 
         <div

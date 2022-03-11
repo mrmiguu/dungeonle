@@ -4,11 +4,22 @@ module.exports = {
     extend: {
       animation: {
         breathe: `breathe ${3}s ease-in-out infinite`,
+        twist: `twist ${3}s ease-in-out infinite`,
+        'twist-fast': `twist ${1.5}s ease-in-out infinite`,
+        'spin-twist': `spin-twist ${3}s ease-in-out infinite`,
       },
       keyframes: {
         breathe: {
           '0%, 100%': { transform: `scale(${1})` },
           '50%': { transform: `scale(${1.05})` },
+        },
+        twist: {
+          '0%, 100%': { transform: `scaleX(${1})` },
+          '50%': { transform: `scaleX(${-1})` },
+        },
+        'spin-twist': {
+          '0%, 100%': { transform: `rotate(0deg) scaleX(${1})` },
+          '50%': { transform: `rotate(360deg) scaleX(${-1})` },
         },
       },
       transitionDuration: {

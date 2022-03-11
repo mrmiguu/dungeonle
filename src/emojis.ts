@@ -3,6 +3,8 @@ import { MouthKind } from './mouths'
 const openmoji_svg_color = import.meta.glob('./openmoji-svg-color/*.svg')
 
 const emojis = [
+  '🪙',
+  '⭐️',
   '🍳',
   '🧀',
   '🥯',
@@ -107,6 +109,8 @@ type Emoji = typeof emojis[number]
 const faceOverrides: {
   [k in Emoji]: Partial<{ x: number; y: number; eyeDistance: number; mouth: MouthKind }>
 } = {
+  '🪙': {},
+  '⭐️': {},
   '🍳': { y: 22.5, mouth: 'D' },
   '🧀': { y: -17 },
   '🥯': { x: -1, y: 12.5, eyeDistance: -6, mouth: '3' },

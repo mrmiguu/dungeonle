@@ -4,6 +4,7 @@ import toast, { Toaster } from 'react-hot-toast'
 import { v4 as uuid4 } from 'uuid'
 import { useInput } from './appHooks'
 import Camera from './Camera'
+import EmojiItem from './EmojiItem'
 import EmojiMonster from './EmojiMonster'
 import { music_imports, useMusic } from './music'
 import { random } from './random'
@@ -29,8 +30,14 @@ function App() {
   useEffect(
     () =>
       void setSprites({
-        [myUUId]: { emoji: '🍳', x: 0, y: 0 },
-        [uuid4()]: { emoji: '🍎', x: 1, y: 1 },
+        [myUUId]: { emoji: '🍳', x: 0, y: 0, kind: 'monster' },
+        [uuid4()]: { emoji: '🍎', x: 1, y: 1, kind: 'monster' },
+        [uuid4()]: { emoji: '🪙', x: 1, y: 2, kind: 'item' },
+        [uuid4()]: { emoji: '🪙', x: 2, y: 1, kind: 'item' },
+        [uuid4()]: { emoji: '🪙', x: 3, y: 2, kind: 'item' },
+        [uuid4()]: { emoji: '🪙', x: 4, y: 1, kind: 'item' },
+        [uuid4()]: { emoji: '🪙', x: 5, y: 2, kind: 'item' },
+        [uuid4()]: { emoji: '🪙', x: 6, y: 1, kind: 'item' },
       }),
     [myUUId],
   )
@@ -104,19 +111,20 @@ function App() {
 
   const elSprites = (
     <div className="absolute top-0 left-0 w-full h-full">
-      {entries(sprites).map(([uuid, { emoji, x, y }]) => (
+      {entries(sprites).map(([uuid, { emoji, x, y, kind }]) => (
         <div
           key={uuid}
           className="absolute top-0 left-0 flex items-center justify-center transition-transform duration-1250 ease-out-expo"
           style={{
             ...styleSpriteTile,
             transform: `translate(${100 * x}%,${100 * y}%)`,
-            zIndex: y,
+            zIndex: y * 2 + (kind === 'monster' ? 1 : 0),
           }}
           onClick={() => toast(`Clicked tile ${stringify([x, y])}`)}
         >
           <div className="flex items-center justify-center">
-            {<EmojiMonster emoji={emoji} className="absolute w-full h-full" />}
+            {kind === 'monster' && <EmojiMonster emoji={emoji} className="absolute w-full h-full" />}
+            {kind === 'item' && <EmojiItem emoji={emoji} className="absolute w-2/5 h-2/5" />}
           </div>
         </div>
       ))}
