@@ -147,9 +147,9 @@ function App() {
         return (
           <div
             key={`${x}`}
-            className={`relative flex items-center justify-center w-full h-full bg-green-400 shrink-0 outline-dashed outline-green-900 ${
+            className={`relative flex items-center justify-center w-full h-full shrink-0 ${
               tr ? 'rounded-tr-full' : br ? 'rounded-br-full' : bl ? 'rounded-bl-full' : tl ? 'rounded-tl-full' : null
-            }`}
+            } ${(x % 2 === 0 && y % 2 === 0) || (x % 2 === 1 && y % 2 === 1) ? 'bg-green-400' : 'bg-green-500'}`}
             onClick={() => toast(`Clicked tile ${stringify([x, y])}`)}
           >
             <div className="flex items-end justify-center">{/* TODO: add static tile things here */}</div>
