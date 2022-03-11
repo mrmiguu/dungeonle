@@ -1,11 +1,10 @@
 import { CSSProperties } from 'react'
-
 import { MouthKind } from './mouths'
 
 function Mouth({ kind, className, style }: { kind: MouthKind; className?: string; style?: CSSProperties }) {
   return (
     <div className={className} style={style}>
-      <div className="aspect-square w-full rotate-90">
+      <div className="w-full rotate-90 aspect-square">
         <svg
           width="100%"
           height="100%"

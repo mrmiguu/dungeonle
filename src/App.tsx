@@ -1,106 +1,158 @@
+import produce from 'immer'
 import { CSSProperties, useEffect, useMemo, useState } from 'react'
-import { Flipper, Flipped } from 'react-flip-toolkit'
 import toast, { Toaster } from 'react-hot-toast'
-
-import { useGenericDocumentInput } from './appHooks'
+import { v4 as uuid4 } from 'uuid'
+import { useInput } from './appHooks'
+import Camera from './Camera'
 import EmojiMonster from './EmojiMonster'
-import { emojis } from './emojis'
-import { stringify } from './utils'
+import { music_imports, useMusic } from './music'
+import { random } from './random'
+import { SpriteMap } from './store'
+import { entries, keys, stringify } from './utils'
 
 function App() {
+  // toast('<App>')
+
+  const randomMusic = useMemo(() => {
+    const musicPaths = keys(music_imports)
+    return musicPaths[~~(random() * musicPaths.length)]!
+  }, [])
+  useMusic(randomMusic)
+
+  const myUUId = useMemo(() => uuid4(), [])
+
+  const [sprites, setSprites] = useState<SpriteMap>({})
+  const mySprite = sprites[myUUId]
+
+  useEffect(
+    () =>
+      void setSprites({
+        [myUUId]: { emoji: '🍳', x: 0, y: 0 },
+        [uuid4()]: { emoji: '🍎', x: 1, y: 1 },
+      }),
+    [myUUId],
+  )
+
+  const moveUp = () =>
+    setSprites(
+      produce<SpriteMap>(sprites => {
+        sprites[myUUId]!.y--
+      }),
+    )
+  const moveLeft = () =>
+    setSprites(
+      produce<SpriteMap>(sprites => {
+        sprites[myUUId]!.x--
+      }),
+    )
+  const moveDown = () =>
+    setSprites(
+      produce<SpriteMap>(sprites => {
+        sprites[myUUId]!.y++
+      }),
+    )
+  const moveRight = () =>
+    setSprites(
+      produce<SpriteMap>(sprites => {
+        sprites[myUUId]!.x++
+      }),
+    )
+
   const [mapWidth, mapHeight] = useMemo(() => [8, 4], [])
+  const tileWidth = 1 / mapWidth
+  const tileHeight = 1 / mapHeight
 
-  const [cameraPosition, setCameraPosition] = useState<[number, number]>([0, 0])
-  const [cameraX, cameraY] = cameraPosition
+  const { x: cameraX, y: cameraY } = mySprite ?? { x: 0, y: 0 }
 
-  const { inputTimestamp, inputUpTimestamp, inputLeftTimestamp, inputDownTimestamp, inputRightTimestamp } =
-    useGenericDocumentInput()
+  useInput({
+    tap() {
+      toast('💥')
+    },
+    up() {
+      moveUp()
+    },
+    left() {
+      moveLeft()
+    },
+    down() {
+      moveDown()
+    },
+    right() {
+      moveRight()
+    },
+  })
 
-  useEffect(() => {
-    if (inputTimestamp) toast('4625')
-  }, [inputTimestamp])
-  useEffect(() => {
-    if (inputUpTimestamp) setCameraPosition([cameraX, cameraY - 1])
-  }, [inputUpTimestamp])
-  useEffect(() => {
-    if (inputLeftTimestamp) setCameraPosition([cameraX - 1, cameraY])
-  }, [inputLeftTimestamp])
-  useEffect(() => {
-    if (inputDownTimestamp) setCameraPosition([cameraX, cameraY + 1])
-  }, [inputDownTimestamp])
-  useEffect(() => {
-    if (inputRightTimestamp) setCameraPosition([cameraX + 1, cameraY])
-  }, [inputRightTimestamp])
-
-  const mapCSS: CSSProperties = {
-    left: `${-100 * cameraX}%`,
-    top: `${-100 * cameraY}%`,
-    width: `${100 * mapWidth}%`,
-    height: `${100 * mapHeight}%`,
-  }
-  const mapRowCSS: CSSProperties = {
-    width: `${100 / mapWidth}%`,
-    height: `${100 / mapHeight}%`,
+  const styleSpriteTile: CSSProperties = {
+    width: `${100 * tileWidth}%`,
+    height: `${100 * tileHeight}%`,
   }
 
-  const elCamera = (
-    <div className="relative aspect-square portrait:w-1/2 landscape:h-1/2 outline">
-      <Flipper flipKey={stringify(cameraPosition)} spring="noWobble">
-        <Flipped flipId="map">
-          <div className="absolute w-full h-full bg-green-500" style={mapCSS}>
-            {[...Array(mapHeight)].map((_, y) => (
-              <div key={`${y}`} className="flex bg-red-500" style={mapRowCSS}>
-                {[...Array(mapWidth)].map((_, x) => {
-                  const emoji = emojis[(y * mapWidth + x) % emojis.length]!
-
-                  return (
-                    <div
-                      key={`${x}`}
-                      className="relative w-full h-full shrink-0 flex justify-center items-center bg-green-400 outline-dotted"
-                      onClick={() => toast(`Clicked tile ${stringify([x, y])}`)}
-                    >
-                      <div className="flex justify-center items-end">
-                        <EmojiMonster emoji={emoji} className="absolute w-full h-full" />
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            ))}
+  const elSprites = (
+    <div className="absolute top-0 left-0 w-full h-full">
+      {entries(sprites).map(([uuid, { emoji, x, y }]) => (
+        <div
+          key={uuid}
+          className="absolute top-0 left-0 flex items-center justify-center transition-transform bg-yellow-400 duration-1250 ease-out-expo"
+          style={{
+            ...styleSpriteTile,
+            transform: `translate(${100 * x}%,${100 * y}%)`,
+            zIndex: y,
+          }}
+          onClick={() => toast(`Clicked tile ${stringify([x, y])}`)}
+        >
+          <div className="flex items-end justify-center">
+            {<EmojiMonster emoji={emoji} className="absolute w-full h-full" />}
           </div>
-        </Flipped>
-      </Flipper>
+        </div>
+      ))}
     </div>
   )
 
-  const elPassiveNotificationsToaster = <Toaster position="bottom-right" />
+  const styleTileRow: CSSProperties = {
+    width: `${100 * tileWidth}%`,
+    height: `${100 * tileHeight}%`,
+  }
 
-  const elDebug = (
-    <div className="fixed left-0 top-0 bg-red-500/30">
-      <pre>
-        {stringify(
-          {
-            inputUpTimestamp,
-            inputLeftTimestamp,
-            inputDownTimestamp,
-            inputRightTimestamp,
-            cameraPosition,
-          },
-          null,
-          2,
-        )}
-      </pre>
+  const elTiles = [...Array(mapHeight)].map((_, y) => (
+    <div key={`${y}`} className="flex bg-red-500" style={styleTileRow}>
+      {[...Array(mapWidth)].map((_, x) => (
+        <div
+          key={`${x}`}
+          className="relative flex items-center justify-center w-full h-full bg-green-400 shrink-0 outline-dotted"
+          onClick={() => toast(`Clicked tile ${stringify([x, y])}`)}
+        >
+          <div className="flex items-end justify-center">{/* TODO: add static tile things here */}</div>
+        </div>
+      ))}
     </div>
-  )
+  ))
+
+  // const elDebug = (
+  //   <div className="fixed top-0 left-0 bg-red-500/30">
+  //     <pre>{stringify({ cameraPosition }, null, 2)}</pre>
+  //   </div>
+  // )
 
   return (
     <>
       <div className="absolute w-full h-full overflow-hidden">
         <div className="absolute w-full h-full bg-gradient-to-b from-blue-600 to-blue-300" />
-        <div className="absolute w-full h-full flex justify-center items-center">{elCamera}</div>
+        <div className="absolute flex items-center justify-center w-full h-full">
+          <Camera
+            x={cameraX}
+            y={cameraY}
+            tileWidth={tileWidth}
+            tileHeight={tileHeight}
+            mapWidth={mapWidth}
+            mapHeight={mapHeight}
+          >
+            {elTiles}
+            {elSprites}
+          </Camera>
+        </div>
       </div>
 
-      {elPassiveNotificationsToaster}
+      <Toaster position="bottom-right" />
       {/* {elDebug} */}
     </>
   )

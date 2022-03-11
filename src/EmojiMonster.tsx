@@ -1,25 +1,24 @@
 import { useMemo } from 'react'
 import useAsync from 'react-use/lib/useAsync'
-import seedrandom from 'seedrandom'
-
 import BlackBeadyEye from './BlackBeadyEye'
-import { faceOverrides, FaceOverride, openmoji_svg_color } from './emojis'
-import { abs, keys, log, sleep, stringify, unicode } from './utils'
+import { FaceOverride, faceOverrides, openmoji_svg_color } from './emojis'
 import Mouth from './Mouth'
 import { mouths } from './mouths'
+import { random } from './random'
+import { abs, keys, log, sleep, stringify, unicode } from './utils'
 
-function EmojiMonster({ emoji, className }: { emoji: string; className?: string }) {
+type EmojiMonsterProps = { emoji: string; className?: string }
+
+function EmojiMonster({ emoji, className }: EmojiMonsterProps) {
   const pendingAnimationDelay = useAsync(async () => {
-    const random = seedrandom(emoji)
-    await sleep(~~(random() * 3000))
+    await sleep(~~(random(emoji) * 3000))
   }, [emoji])
 
   const faceOffset = faceOverrides[emoji as FaceOverride]
 
   const mouth = useMemo(() => {
     const { length } = mouths
-    const random = seedrandom(emoji)
-    return faceOffset.mouth ?? mouths[~~abs(random() * length) % length]!
+    return faceOffset.mouth ?? mouths[~~abs(random(emoji) * length) % length]!
   }, [emoji])
 
   const pendingEmojiSVG = useAsync(async () => {
@@ -57,19 +56,19 @@ function EmojiMonster({ emoji, className }: { emoji: string; className?: string 
   )
 
   const elFace = (
-    <div className="flex flex-col w-full justify-center items-center">
+    <div className="flex flex-col items-center justify-center w-full">
       {elFaceEyes}
       <Mouth kind={mouth} style={{ width: `${7}%` }} />
     </div>
   )
 
-  return (
+  const el = (
     <div className={`${className}`}>
       <div className={`relative w-full h-full origin-bottom ${!pendingAnimationDelay.loading && 'animate-breathe'}`}>
         {emojiSVG && <img className="w-full h-full" src={emojiSVG} alt="monster emoji" />}
 
         <div
-          className="absolute left-0 top-0 w-full h-full flex justify-center items-center"
+          className="absolute top-0 left-0 flex items-center justify-center w-full h-full"
           style={{
             marginLeft: `${faceOffset.x}%`,
             marginTop: `${faceOffset.y}%`,
@@ -80,6 +79,8 @@ function EmojiMonster({ emoji, className }: { emoji: string; className?: string 
       </div>
     </div>
   )
+
+  return el
 }
 
 export default EmojiMonster

@@ -102,10 +102,12 @@ const emojis = [
   '🔒',
 ] as const
 
+type Emoji = typeof emojis[number]
+
 const faceOverrides: {
-  [k in typeof emojis[number]]: Partial<{ x: number; y: number; eyeDistance: number; mouth: MouthKind }>
+  [k in Emoji]: Partial<{ x: number; y: number; eyeDistance: number; mouth: MouthKind }>
 } = {
-  '🍳': { y: 22.5 },
+  '🍳': { y: 22.5, mouth: 'D' },
   '🧀': { y: -17 },
   '🥯': { x: -1, y: 12.5, eyeDistance: -6, mouth: '3' },
   '🌰': { x: 2, y: 3, eyeDistance: -3 },
@@ -206,5 +208,5 @@ const faceOverrides: {
 
 type FaceOverride = keyof typeof faceOverrides
 
-export type { FaceOverride }
+export type { Emoji, FaceOverride }
 export { openmoji_svg_color, emojis, faceOverrides }

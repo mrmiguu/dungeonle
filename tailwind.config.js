@@ -11,6 +11,15 @@ module.exports = {
           '50%': { transform: `scale(${1.05})` },
         },
       },
+      transitionDuration: {
+        0: '0ms',
+        1250: '1250ms',
+        1500: '1500ms',
+        2000: '2000ms',
+      },
+      transitionTimingFunction: {
+        'out-expo': 'cubic-bezier(0.16, 1, 0.3, 1)',
+      },
     },
   },
   plugins: [],
