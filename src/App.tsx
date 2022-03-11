@@ -35,6 +35,11 @@ function App() {
     [myUUId],
   )
 
+  const interact = (uuid = myUUId) => {
+    playSound('hit.wav')
+    toast('💥')
+  }
+
   const moveUp = (uuid = myUUId) => {
     playSound('move.wav')
     setSprites(
@@ -76,7 +81,7 @@ function App() {
 
   useInput({
     tap() {
-      toast('💥')
+      interact()
     },
     up() {
       moveUp()
