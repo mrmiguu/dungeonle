@@ -7,6 +7,7 @@ import Camera from './Camera'
 import EmojiMonster from './EmojiMonster'
 import { music_imports, useMusic } from './music'
 import { random } from './random'
+import { playSound } from './sounds'
 import { SpriteMap } from './store'
 import { entries, keys, stringify } from './utils'
 
@@ -17,7 +18,8 @@ function App() {
     const musicPaths = keys(music_imports)
     return musicPaths[~~(random() * musicPaths.length)]!
   }, [])
-  useMusic(randomMusic)
+
+  useMusic(randomMusic, true)
 
   const myUUId = useMemo(() => uuid4(), [])
 
@@ -33,30 +35,38 @@ function App() {
     [myUUId],
   )
 
-  const moveUp = () =>
+  const moveUp = (uuid = myUUId) => {
+    playSound('move.wav')
     setSprites(
       produce<SpriteMap>(sprites => {
-        sprites[myUUId]!.y--
+        sprites[uuid]!.y--
       }),
     )
-  const moveLeft = () =>
+  }
+  const moveLeft = (uuid = myUUId) => {
+    playSound('move.wav')
     setSprites(
       produce<SpriteMap>(sprites => {
-        sprites[myUUId]!.x--
+        sprites[uuid]!.x--
       }),
     )
-  const moveDown = () =>
+  }
+  const moveDown = (uuid = myUUId) => {
+    playSound('move.wav')
     setSprites(
       produce<SpriteMap>(sprites => {
-        sprites[myUUId]!.y++
+        sprites[uuid]!.y++
       }),
     )
-  const moveRight = () =>
+  }
+  const moveRight = (uuid = myUUId) => {
+    playSound('move.wav')
     setSprites(
       produce<SpriteMap>(sprites => {
-        sprites[myUUId]!.x++
+        sprites[uuid]!.x++
       }),
     )
+  }
 
   const [mapWidth, mapHeight] = useMemo(() => [8, 4], [])
   const tileWidth = 1 / mapWidth

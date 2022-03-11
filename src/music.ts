@@ -23,24 +23,26 @@ async function music(file: string) {
 }
 const music_cache = new Map<string, Howl>()
 
-async function playMusic(file: string) {
-  ;(await music(file)).play()
+async function playMusic(file: string, loop?: boolean) {
+  const howl = await music(file)
+  howl.loop(loop ?? false)
+  howl.play()
 }
 
 async function stopMusic(file: string) {
   ;(await music(file)).stop()
 }
 
-function useMusic(file?: string) {
+function useMusic(file?: string, loop?: boolean) {
   useEffect(() => {
     if (!file) return
 
-    playMusic(file)
+    playMusic(file, loop)
 
     return () => {
       stopMusic(file)
     }
-  }, [file])
+  }, [file, loop])
 }
 
 export { music_imports, music, playMusic, useMusic }
