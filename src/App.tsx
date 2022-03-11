@@ -42,9 +42,36 @@ function App() {
     [myUUId],
   )
 
+  useEffect(() => {
+    setSprites(
+      produce<SpriteMap>(sprites => {
+        for (const coinUUId in sprites) {
+          const coinItem = sprites[coinUUId]!
+
+          if (coinItem.emoji === '🪙' && coinItem.kind === 'item') {
+            for (const innerUUId in sprites) {
+              const { x, y, kind } = sprites[innerUUId]!
+
+              if (coinItem.x === x && coinItem.y === y && kind === 'monster') {
+                playSound('coin.wav')
+                toast.custom(
+                  <>
+                    +<EmojiItem emoji="🪙" className="w-8 h-8" />
+                  </>,
+                  { duration: 250 },
+                )
+                delete sprites[coinUUId]
+              }
+            }
+          }
+        }
+      }),
+    )
+  }, [sprites])
+
   const interact = (uuid = myUUId) => {
     playSound('hit.wav')
-    toast('💥')
+    toast('💥', { duration: 500 })
   }
 
   const moveUp = (uuid = myUUId) => {
