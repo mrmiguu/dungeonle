@@ -107,7 +107,7 @@ function App() {
       {entries(sprites).map(([uuid, { emoji, x, y }]) => (
         <div
           key={uuid}
-          className="absolute top-0 left-0 flex items-center justify-center transition-transform bg-yellow-400 duration-1250 ease-out-expo"
+          className="absolute top-0 left-0 flex items-center justify-center transition-transform duration-1250 ease-out-expo"
           style={{
             ...styleSpriteTile,
             transform: `translate(${100 * x}%,${100 * y}%)`,
@@ -115,7 +115,7 @@ function App() {
           }}
           onClick={() => toast(`Clicked tile ${stringify([x, y])}`)}
         >
-          <div className="flex items-end justify-center">
+          <div className="flex items-center justify-center">
             {<EmojiMonster emoji={emoji} className="absolute w-full h-full" />}
           </div>
         </div>
@@ -129,16 +129,25 @@ function App() {
   }
 
   const elTiles = [...Array(mapHeight)].map((_, y) => (
-    <div key={`${y}`} className="flex bg-red-500" style={styleTileRow}>
-      {[...Array(mapWidth)].map((_, x) => (
-        <div
-          key={`${x}`}
-          className="relative flex items-center justify-center w-full h-full bg-green-400 shrink-0 outline-dotted"
-          onClick={() => toast(`Clicked tile ${stringify([x, y])}`)}
-        >
-          <div className="flex items-end justify-center">{/* TODO: add static tile things here */}</div>
-        </div>
-      ))}
+    <div key={`${y}`} className="flex" style={styleTileRow}>
+      {[...Array(mapWidth)].map((_, x) => {
+        const tr = x === mapWidth - 1 && y === 0
+        const br = x === mapWidth - 1 && y === mapHeight - 1
+        const bl = x === 0 && y === mapHeight - 1
+        const tl = x === 0 && y === 0
+
+        return (
+          <div
+            key={`${x}`}
+            className={`relative flex items-center justify-center w-full h-full bg-green-400 shrink-0 outline-dashed outline-green-900 ${
+              tr ? 'rounded-tr-full' : br ? 'rounded-br-full' : bl ? 'rounded-bl-full' : tl ? 'rounded-tl-full' : null
+            }`}
+            onClick={() => toast(`Clicked tile ${stringify([x, y])}`)}
+          >
+            <div className="flex items-end justify-center">{/* TODO: add static tile things here */}</div>
+          </div>
+        )
+      })}
     </div>
   ))
 
@@ -168,6 +177,7 @@ function App() {
       </div>
 
       <Toaster position="bottom-right" />
+
       {/* {elDebug} */}
     </>
   )

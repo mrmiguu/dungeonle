@@ -26,7 +26,7 @@ function Camera({ x, y, tileWidth, tileHeight, mapWidth, mapHeight, className, s
   )
 
   return (
-    <div className={`relative aspect-square portrait:w-1/2 landscape:h-1/2 outline ${className}`} style={style}>
+    <div className={`relative aspect-square portrait:w-1/2 landscape:h-1/2 ${className}`} style={style}>
       {elWorld}
     </div>
   )
