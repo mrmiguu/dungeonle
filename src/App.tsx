@@ -1,4 +1,4 @@
-import produce from 'immer'
+import immer from 'immer'
 import { CSSProperties, useEffect, useMemo, useState } from 'react'
 import toast, { Toaster } from 'react-hot-toast'
 import { v4 as uuid4 } from 'uuid'
@@ -10,7 +10,14 @@ import { music_imports, useMusic } from './music'
 import { random } from './random'
 import { playSound } from './sounds'
 import { SpriteMap } from './store'
-import { entries, keys, stringify } from './utils'
+import { entries, keys } from './utils'
+
+const gradients = {
+  normal: ['red', 'yellow'],
+  critical: ['red', 'magenta'],
+  self: ['indigo', 'magenta'],
+  selfCritical: ['black', 'magenta'],
+} as const
 
 function App() {
   // toast('<App>')
@@ -44,21 +51,21 @@ function App() {
 
   useEffect(() => {
     setSprites(
-      produce<SpriteMap>(sprites => {
+      immer<SpriteMap>(sprites => {
         for (const coinUUId in sprites) {
           const coinItem = sprites[coinUUId]!
 
           if (coinItem.emoji === '🪙' && coinItem.kind === 'item') {
-            for (const innerUUId in sprites) {
-              const { x, y, kind } = sprites[innerUUId]!
+            for (const monsterUUId in sprites) {
+              const { x, y, kind } = sprites[monsterUUId]!
 
               if (coinItem.x === x && coinItem.y === y && kind === 'monster') {
                 playSound('coin.wav')
-                toast.custom(
-                  <>
-                    +<EmojiItem emoji="🪙" className="w-8 h-8" />
-                  </>,
-                  { duration: 250 },
+                toast(
+                  <div className="flex items-center">
+                    +<EmojiItem emoji="🪙" className="w-[8vmin] h-[8vmin]" />
+                  </div>,
+                  { duration: 750, toasterId: monsterUUId },
                 )
                 delete sprites[coinUUId]
               }
@@ -71,41 +78,48 @@ function App() {
 
   const interact = (uuid = myUUId) => {
     playSound('hit.wav')
-    toast('💥', { duration: 500 })
+
+    const dmg = ~~(random('💥') * 1000) + 100
+    const gradient = gradients.normal
+
+    toast(
+      <div
+        className="font-[DamageFont] font-bold text-[20vmin] leading-none text-transparent bg-clip-text"
+        style={{
+          backgroundImage: `linear-gradient(to bottom, ${gradient[0]} 30%, ${gradient[1]} 70%)`,
+        }}
+      >
+        {dmg}
+      </div>,
+      {
+        className: '-mt-[20vmin] p-0',
+        duration: 500,
+        toasterId: uuid,
+      },
+    )
   }
 
-  const moveUp = (uuid = myUUId) => {
+  const move = (mutate: (sprites: SpriteMap) => void) => {
     playSound('move.wav')
-    setSprites(
-      produce<SpriteMap>(sprites => {
-        sprites[uuid]!.y--
-      }),
-    )
+    setSprites(immer<SpriteMap>(mutate))
   }
-  const moveLeft = (uuid = myUUId) => {
-    playSound('move.wav')
-    setSprites(
-      produce<SpriteMap>(sprites => {
-        sprites[uuid]!.x--
-      }),
-    )
-  }
-  const moveDown = (uuid = myUUId) => {
-    playSound('move.wav')
-    setSprites(
-      produce<SpriteMap>(sprites => {
-        sprites[uuid]!.y++
-      }),
-    )
-  }
-  const moveRight = (uuid = myUUId) => {
-    playSound('move.wav')
-    setSprites(
-      produce<SpriteMap>(sprites => {
-        sprites[uuid]!.x++
-      }),
-    )
-  }
+
+  const moveUp = (uuid = myUUId) =>
+    move(sprites => {
+      sprites[uuid]!.y--
+    })
+  const moveLeft = (uuid = myUUId) =>
+    move(sprites => {
+      sprites[uuid]!.x--
+    })
+  const moveDown = (uuid = myUUId) =>
+    move(sprites => {
+      sprites[uuid]!.y++
+    })
+  const moveRight = (uuid = myUUId) =>
+    move(sprites => {
+      sprites[uuid]!.x++
+    })
 
   const [mapWidth, mapHeight] = useMemo(() => [8, 4], [])
   const tileWidth = 1 / mapWidth
@@ -113,23 +127,31 @@ function App() {
 
   const { x: cameraX, y: cameraY } = mySprite ?? { x: 0, y: 0 }
 
-  useInput({
-    tap() {
-      interact()
+  useInput(
+    {
+      tap() {
+        if (!mySprite) return
+
+        for (const uuid in sprites) {
+          const { x, y } = sprites[uuid]!
+          if (x === mySprite.x && y === mySprite.y && uuid !== myUUId) interact(uuid)
+        }
+      },
+      up() {
+        moveUp()
+      },
+      left() {
+        moveLeft()
+      },
+      down() {
+        moveDown()
+      },
+      right() {
+        moveRight()
+      },
     },
-    up() {
-      moveUp()
-    },
-    left() {
-      moveLeft()
-    },
-    down() {
-      moveDown()
-    },
-    right() {
-      moveRight()
-    },
-  })
+    [sprites],
+  )
 
   const styleSpriteTile: CSSProperties = {
     width: `${100 * tileWidth}%`,
@@ -147,10 +169,29 @@ function App() {
             transform: `translate(${100 * x}%,${100 * y}%)`,
             zIndex: y * 2 + (kind === 'monster' ? 1 : 0),
           }}
-          onClick={() => toast(`Clicked tile ${stringify([x, y])}`)}
+          // onClick={() => toast(`Clicked tile ${stringify([x, y])}`)}
         >
           <div className="flex items-center justify-center">
-            {kind === 'monster' && <EmojiMonster emoji={emoji} className="absolute w-full h-full" />}
+            {kind === 'monster' && (
+              <>
+                <EmojiMonster emoji={emoji} className="absolute w-full h-full" />
+                <Toaster
+                  position="bottom-center"
+                  containerStyle={{
+                    position: 'absolute',
+                    left: 0,
+                    top: 0,
+                    right: 0,
+                    bottom: 0,
+                    width: `${100}%`,
+                    height: `${100}%`,
+                    transform: `translate(${0}%,${-100}%)`,
+                  }}
+                  reverseOrder
+                  toasterId={uuid}
+                />
+              </>
+            )}
             {kind === 'item' && <EmojiItem emoji={emoji} className="absolute w-2/5 h-2/5" />}
           </div>
         </div>
@@ -177,7 +218,7 @@ function App() {
             className={`relative flex items-center justify-center w-full h-full shrink-0 ${
               tr ? 'rounded-tr-full' : br ? 'rounded-br-full' : bl ? 'rounded-bl-full' : tl ? 'rounded-tl-full' : null
             } ${(x % 2 === 0 && y % 2 === 0) || (x % 2 === 1 && y % 2 === 1) ? 'bg-green-400' : 'bg-green-500'}`}
-            onClick={() => toast(`Clicked tile ${stringify([x, y])}`)}
+            // onClick={() => toast(`Clicked tile ${stringify([x, y])}`)}
           >
             <div className="flex items-end justify-center">{/* TODO: add static tile things here */}</div>
           </div>
@@ -211,7 +252,7 @@ function App() {
         </div>
       </div>
 
-      <Toaster position="bottom-right" />
+      {/* <Toaster /> */}
 
       {/* {elDebug} */}
     </>

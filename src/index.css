@@ -9,3 +9,8 @@
 :not(input) {
   user-select: none;
 }
+
+@font-face {
+  font-family: DamageFont;
+  src: url(./fonts/Digitalt.otf);
+}

@@ -26,15 +26,15 @@ function useTouch(map: Partial<{ [key in Touch | Swipe]: () => void }>, deps?: D
     const swipedHorizontally = abs(swipeDX) > swipeThreshold && abs(swipeDX) > abs(swipeDY)
     const swipedVertically = abs(swipeDY) > swipeThreshold && abs(swipeDX) < abs(swipeDY)
 
-    const swipedUpTimestamp = swipedVertically && swipeDY < 0
-    const swipedLeftTimestamp = swipedHorizontally && swipeDX < 0
-    const swipedDownTimestamp = swipedVertically && swipeDY > 0
-    const swipedRightTimestamp = swipedHorizontally && swipeDX > 0
+    const swipedUp = swipedVertically && swipeDY < 0
+    const swipedLeft = swipedHorizontally && swipeDX < 0
+    const swipedDown = swipedVertically && swipeDY > 0
+    const swipedRight = swipedHorizontally && swipeDX > 0
 
-    if (swipedUpTimestamp) map.swipeup?.()
-    else if (swipedLeftTimestamp) map.swipeleft?.()
-    else if (swipedDownTimestamp) map.swipedown?.()
-    else if (swipedRightTimestamp) map.swiperight?.()
+    if (swipedUp) map.swipeup?.()
+    else if (swipedLeft) map.swipeleft?.()
+    else if (swipedDown) map.swipedown?.()
+    else if (swipedRight) map.swiperight?.()
     else map.touch?.()
   }, deps ?? [])
 
