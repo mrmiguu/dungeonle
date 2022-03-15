@@ -189,18 +189,22 @@ function App() {
   const moveUp = (uuid = myUUId) =>
     move(sprites => {
       sprites[uuid]!.y--
+      sprites[uuid]!.action = null
     })
   const moveLeft = (uuid = myUUId) =>
     move(sprites => {
       sprites[uuid]!.x--
+      sprites[uuid]!.action = null
     })
   const moveDown = (uuid = myUUId) =>
     move(sprites => {
       sprites[uuid]!.y++
+      sprites[uuid]!.action = null
     })
   const moveRight = (uuid = myUUId) =>
     move(sprites => {
       sprites[uuid]!.x++
+      sprites[uuid]!.action = null
     })
 
   const [mapWidth, mapHeight] = useMemo(() => [8, 4], [])
