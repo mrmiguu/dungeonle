@@ -3,7 +3,7 @@ import { useEffect } from 'react'
 import create from 'zustand'
 import { Emoji } from './emojis'
 
-type Sprite = { emoji: Emoji; x: number; y: number; kind: 'monster' | 'item' }
+type Sprite = { emoji: Emoji; x: number; y: number; kind: 'monster' | 'item' | 'chest' }
 type SpriteMap = { [uuid: string]: Sprite }
 
 type SpriteStore = {

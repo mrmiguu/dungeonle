@@ -3,6 +3,9 @@ import { MouthKind } from './mouths'
 const openmoji_svg_color = import.meta.glob('./openmoji-svg-color/*.svg')
 
 const emojis = [
+  '🗺️',
+  '🧭',
+  '📦',
   '🪙',
   '⭐️',
   '🍳',
@@ -106,11 +109,9 @@ const emojis = [
 
 type Emoji = typeof emojis[number]
 
-const faceOverrides: {
+const faceOverrides: Partial<{
   [k in Emoji]: Partial<{ x: number; y: number; eyeDistance: number; mouth: MouthKind }>
-} = {
-  '🪙': {},
-  '⭐️': {},
+}> = {
   '🍳': { y: 22.5, mouth: 'D' },
   '🧀': { y: -17 },
   '🥯': { x: -1, y: 12.5, eyeDistance: -6, mouth: '3' },
@@ -136,7 +137,6 @@ const faceOverrides: {
   '☘️': { x: 2, y: -4, eyeDistance: -5 },
   '🌵': { eyeDistance: -10 },
   '🌳': { y: -13 },
-  '🌲': {},
   '🪴': { x: -0.5, y: 21, eyeDistance: -6 },
   '🌷': { x: 16, y: 2, eyeDistance: -6 },
   '🌼': { x: 8, y: -2, mouth: '7' },
@@ -144,21 +144,9 @@ const faceOverrides: {
   '🐣': { y: 20 },
   '🛌': { y: -2 },
   '👄': { y: -12 },
-  '🦷': {},
-  '💭': {},
-  '🗯️': {},
-  '🗨️': {},
   '💣': { x: -10, y: 5 },
   '💦': { x: -17, y: 10 },
   '💥': { x: -3, y: 2, eyeDistance: -5 },
-  '🤍': {},
-  '🤎': {},
-  '💜': {},
-  '💙': {},
-  '💚': {},
-  '💛': {},
-  '🧡': {},
-  '❤️': {},
   '❤️‍🩹': { y: 12 },
   '❤️‍🔥': { x: -3, y: 7, eyeDistance: -3 },
   '❣️': { y: -15 },
@@ -173,44 +161,34 @@ const faceOverrides: {
   '💀': { y: -10 },
   '☠️': { y: -10 },
   '👻': { y: 10 },
-  '🍏': {},
-  '🍎': {},
-  '🍊': {},
-  '🍋': {},
-  '🥭': {},
-  '🍅': {},
-  '🫒': {},
   '🧄': { y: 10 },
-  '🥔': {},
-  '🥚': {},
   '🥧': { y: 2 },
   '🥠': { x: 5, y: -8 },
   '🍚': { y: 10 },
   '🧊': { x: 16 },
-  '🍽': {},
   '🥣': { y: 10 },
   '🫖': { x: -5, y: 5 },
-  '🥛': {},
   '🍯': { x: -5, y: 10 },
-  '🍿': {},
   '🍫': { y: 10 },
   '🍮': { y: 10 },
   '🎂': { y: -8 },
   '🍵': { x: 10 },
   '🍶': { x: 19, y: 10 },
   '🏓': { x: 2, y: -10 },
-  '🔮': {},
   '🛎': { y: -10 },
-  '🪞': {},
   '🎈': { x: 9, y: -10 },
-  '🏷': {},
-  '📁': {},
   '🗂': { y: 5 },
-  '📒': {},
   '🔒': { y: 7 },
 } as const
 
-type FaceOverride = keyof typeof faceOverrides
+const mapItemOverrides: Partial<{
+  [k in Emoji]: Partial<{ className: string; scale: number; animation: string }>
+}> = {
+  '🪙': { scale: 0.25, animation: 'animate-twist-fast' },
+}
 
-export type { Emoji, FaceOverride }
-export { openmoji_svg_color, emojis, faceOverrides }
+type FaceOverride = keyof typeof faceOverrides
+type MapItemOverride = keyof typeof mapItemOverrides
+
+export type { Emoji, FaceOverride, MapItemOverride }
+export { openmoji_svg_color, emojis, faceOverrides, mapItemOverrides }

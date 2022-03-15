@@ -6,6 +6,7 @@ import './index.css'
 ReactDOM.render(
   // <React.StrictMode>
   <App />,
+  // <EmojiMonsterDemo />,
   // </React.StrictMode>,
   document.getElementById('root'),
 )

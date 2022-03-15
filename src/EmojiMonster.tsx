@@ -12,11 +12,11 @@ type EmojiMonsterProps = { emoji: Emoji; className?: string }
 function EmojiMonster({ emoji, className }: EmojiMonsterProps) {
   const uniqueAnimationTimeOffset = useMemo(() => ~~(random(emoji) * 3000), [emoji])
 
-  const faceOffset = faceOverrides[emoji as FaceOverride]
+  const faceOverride = faceOverrides[emoji as FaceOverride]
 
   const mouth = useMemo(() => {
     const { length } = mouths
-    return faceOffset.mouth ?? mouths[~~abs(random(emoji) * length) % length]!
+    return faceOverride?.mouth ?? mouths[~~abs(random(emoji) * length) % length]!
   }, [emoji])
 
   const pendingEmojiSVG = useAsync(async () => {
@@ -44,7 +44,7 @@ function EmojiMonster({ emoji, className }: EmojiMonsterProps) {
 
   const emojiSVG = pendingEmojiSVG.value
 
-  const elFaceNose = <div style={{ width: `${100 / 6 + (faceOffset.eyeDistance ?? 0)}%` }} />
+  const elFaceNose = <div style={{ width: `${100 / 6 + (faceOverride?.eyeDistance ?? 0)}%` }} />
   const elFaceEyes = (
     <div className="flex justify-center w-full">
       <BlackBeadyEye style={{ width: `${4}%` }} />
@@ -63,17 +63,19 @@ function EmojiMonster({ emoji, className }: EmojiMonsterProps) {
   const el = (
     <div className={`${className}`}>
       <div
-        className="relative w-full h-full origin-bottom animate-breathe"
+        className="relative w-full max-h-full origin-bottom aspect-square animate-breathe"
         style={{ animationDelay: `${-uniqueAnimationTimeOffset}ms` }}
       >
         {emojiSVG && <img className="w-full h-full" src={emojiSVG} alt="monster emoji" />}
 
         <div
           className="absolute top-0 left-0 flex items-center justify-center w-full h-full"
-          style={{
-            marginLeft: `${faceOffset.x}%`,
-            marginTop: `${faceOffset.y}%`,
-          }}
+          style={
+            faceOverride && {
+              marginLeft: `${faceOverride.x}%`,
+              marginTop: `${faceOverride.y}%`,
+            }
+          }
         >
           {elFace}
         </div>

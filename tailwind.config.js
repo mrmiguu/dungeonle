@@ -4,6 +4,7 @@ module.exports = {
     extend: {
       animation: {
         breathe: `breathe ${3}s ease-in-out infinite`,
+        float: `float ${3}s ease-in-out infinite`,
         twist: `twist ${3}s ease-in-out infinite`,
         'twist-fast': `twist ${1.5}s ease-in-out infinite`,
         'spin-twist': `spin-twist ${3}s ease-in-out infinite`,
@@ -12,6 +13,10 @@ module.exports = {
         breathe: {
           '0%, 100%': { transform: `scale(${1})` },
           '50%': { transform: `scale(${1.05})` },
+        },
+        float: {
+          '0%, 100%': { transform: `translateY(${0}%)` },
+          '50%': { transform: `translateY(${-10}%)` },
         },
         twist: {
           '0%, 100%': { transform: `scaleX(${1})` },

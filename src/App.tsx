@@ -4,12 +4,13 @@ import toast, { Toaster } from 'react-hot-toast'
 import { v4 as uuid4 } from 'uuid'
 import { useInput } from './appHooks'
 import Camera from './Camera'
-import EmojiItem from './EmojiItem'
+import EmojiMapItem from './EmojiMapItem'
 import EmojiMonster from './EmojiMonster'
+import EmojiStatic from './EmojiStatic'
 import { music_imports, useMusic } from './music'
 import { random } from './random'
 import { playSound } from './sounds'
-import { SpriteMap } from './store'
+import { Sprite, SpriteMap } from './store'
 import { entries, keys } from './utils'
 
 const gradients = {
@@ -45,61 +46,75 @@ function App() {
         [uuid4()]: { emoji: '🪙', x: 4, y: 1, kind: 'item' },
         [uuid4()]: { emoji: '🪙', x: 5, y: 2, kind: 'item' },
         [uuid4()]: { emoji: '🪙', x: 6, y: 1, kind: 'item' },
+        [uuid4()]: { emoji: '🗺️', x: 3, y: 0, kind: 'item' },
+        [uuid4()]: { emoji: '🧭', x: 0, y: 1, kind: 'chest' },
       }),
     [myUUId],
   )
 
-  useEffect(() => {
+  function grab(
+    on: (sprites: SpriteMap, subject: Sprite, object: Sprite, subjectUUId: string, objectUUId: string) => void,
+  ) {
     setSprites(
-      immer<SpriteMap>(sprites => {
-        for (const coinUUId in sprites) {
-          const coinItem = sprites[coinUUId]!
+      immer(sprites => {
+        for (const objectUUId in sprites) {
+          const object = sprites[objectUUId]!
 
-          if (coinItem.emoji === '🪙' && coinItem.kind === 'item') {
-            for (const monsterUUId in sprites) {
-              const { x, y, kind } = sprites[monsterUUId]!
+          for (const subjectUUId in sprites) {
+            const subject = sprites[subjectUUId]!
 
-              if (coinItem.x === x && coinItem.y === y && kind === 'monster') {
-                playSound('coin.wav')
-                toast(
-                  <div className="flex items-center">
-                    +<EmojiItem emoji="🪙" className="w-[8vmin] h-[8vmin]" />
-                  </div>,
-                  { duration: 750, toasterId: monsterUUId },
-                )
-                delete sprites[coinUUId]
-              }
+            if (subject.x === object.x && subject.y === object.y) {
+              on(sprites, sprites[subjectUUId]!, sprites[objectUUId]!, subjectUUId, objectUUId)
             }
           }
         }
       }),
     )
-  }, [sprites])
-
-  const interact = (uuid = myUUId) => {
-    playSound('hit.wav')
-
-    const dmg = ~~(random('💥') * 1000) + 100
-    const gradient = gradients.normal
-
-    toast(
-      <div
-        className="font-[DamageFont] font-bold text-[20vmin] leading-none text-transparent bg-clip-text"
-        style={{
-          backgroundImage: `linear-gradient(to bottom, ${gradient[0]} 30%, ${gradient[1]} 70%)`,
-        }}
-      >
-        {dmg}
-      </div>,
-      {
-        className: '-mt-[20vmin] p-0',
-        duration: 500,
-        toasterId: uuid,
-      },
-    )
   }
 
-  const move = (mutate: (sprites: SpriteMap) => void) => {
+  useEffect(() => {
+    grab((sprites, subject, object, subjectUUId, objectUUId) => {
+      if (object.emoji === '🪙' && object.kind === 'item' && subject.kind === 'monster') {
+        playSound('coin.wav')
+
+        toast(
+          <div className="flex items-center">
+            +<EmojiStatic emoji="🪙" className="w-[8vmin] h-[8vmin]" />
+          </div>,
+          { duration: 750, toasterId: subjectUUId },
+        )
+
+        delete sprites[objectUUId]
+      }
+    })
+  }, [sprites])
+
+  function interact(uuid: string, kind: Sprite['kind']) {
+    if (kind === 'monster') {
+      playSound('hit.wav')
+
+      const dmg = ~~(random() * 1000) + 100
+      const gradient = gradients.normal
+
+      toast(
+        <div
+          className="font-[DamageFont] font-bold text-[20vmin] leading-none px-2 text-transparent bg-clip-text"
+          style={{
+            backgroundImage: `linear-gradient(to bottom, ${gradient[0]} 30%, ${gradient[1]} 70%)`,
+          }}
+        >
+          {dmg}
+        </div>,
+        {
+          className: '-mt-[20vmin] p-0',
+          duration: 500,
+          toasterId: uuid,
+        },
+      )
+    }
+  }
+
+  function move(mutate: (sprites: SpriteMap) => void) {
     playSound('move.wav')
     setSprites(immer<SpriteMap>(mutate))
   }
@@ -133,8 +148,10 @@ function App() {
         if (!mySprite) return
 
         for (const uuid in sprites) {
-          const { x, y } = sprites[uuid]!
-          if (x === mySprite.x && y === mySprite.y && uuid !== myUUId) interact(uuid)
+          const { x, y, kind } = sprites[uuid]!
+          const onSameTile = x === mySprite.x && y === mySprite.y
+
+          if (onSameTile && uuid !== myUUId) interact(uuid, kind)
         }
       },
       up() {
@@ -192,7 +209,8 @@ function App() {
                 />
               </>
             )}
-            {kind === 'item' && <EmojiItem emoji={emoji} className="absolute w-2/5 h-2/5" />}
+            {kind === 'item' && <EmojiMapItem emoji={emoji} className="absolute w-full h-full" />}
+            {kind === 'chest' && <EmojiMapItem emoji="📦" className="absolute w-full h-full scale-150 animate-none" />}
           </div>
         </div>
       ))}
