@@ -3,6 +3,7 @@ import { MouthKind } from './mouths'
 const openmoji_svg_color = import.meta.glob('./openmoji-svg-color/*.svg')
 
 const emojis = [
+  '❤',
   '🗺️',
   '🧭',
   '📦',

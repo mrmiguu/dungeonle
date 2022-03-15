@@ -6,13 +6,13 @@ import { useInput } from './appHooks'
 import Camera from './Camera'
 import EmojiMapItem from './EmojiMapItem'
 import EmojiMonster from './EmojiMonster'
-import { mapItemOverrides } from './emojis'
+import { Emoji, mapItemOverrides } from './emojis'
 import EmojiStatic from './EmojiStatic'
 import { music_imports, useMusic } from './music'
 import { random } from './random'
 import { playSound } from './sounds'
 import { Sprite, SpriteMap } from './store'
-import { entries, keys } from './utils'
+import { entries, keys, max } from './utils'
 
 const gradients = {
   normal: ['red', 'yellow'],
@@ -39,16 +39,16 @@ function App() {
   useEffect(
     () =>
       void setSprites({
-        [myUUId]: { emoji: '🍳', x: 0, y: 0, kind: 'monster', action: null },
-        [uuid4()]: { emoji: '🍎', x: 1, y: 1, kind: 'monster', action: null },
-        [uuid4()]: { emoji: '🪙', x: 1, y: 2, kind: 'item', action: null },
-        [uuid4()]: { emoji: '🪙', x: 2, y: 1, kind: 'item', action: null },
-        [uuid4()]: { emoji: '🪙', x: 3, y: 2, kind: 'item', action: null },
-        [uuid4()]: { emoji: '🪙', x: 4, y: 1, kind: 'item', action: null },
-        [uuid4()]: { emoji: '🪙', x: 5, y: 2, kind: 'item', action: null },
-        [uuid4()]: { emoji: '🪙', x: 6, y: 1, kind: 'item', action: null },
-        [uuid4()]: { emoji: '🗺️', x: 3, y: 0, kind: 'item', action: null },
-        [uuid4()]: { emoji: '🧭', x: 0, y: 1, kind: 'chest', action: null },
+        [myUUId]: { emoji: '🍳', x: 0, y: 0, kind: 'monster', action: null, items: {}, hearts: 10000 },
+        [uuid4()]: { emoji: '🍎', x: 1, y: 1, kind: 'monster', action: null, items: { '❤️': 1, '🪙': 2 }, hearts: 5000 },
+        [uuid4()]: { emoji: '🪙', x: 1, y: 2, kind: 'item', action: null, items: {}, hearts: 1 },
+        [uuid4()]: { emoji: '🪙', x: 2, y: 1, kind: 'item', action: null, items: {}, hearts: 1 },
+        [uuid4()]: { emoji: '🪙', x: 3, y: 2, kind: 'item', action: null, items: {}, hearts: 1 },
+        [uuid4()]: { emoji: '🪙', x: 4, y: 1, kind: 'item', action: null, items: {}, hearts: 1 },
+        [uuid4()]: { emoji: '🪙', x: 5, y: 2, kind: 'item', action: null, items: {}, hearts: 1 },
+        [uuid4()]: { emoji: '🪙', x: 6, y: 1, kind: 'item', action: null, items: {}, hearts: 1 },
+        [uuid4()]: { emoji: '🗺️', x: 3, y: 0, kind: 'chest', action: null, items: {}, hearts: 1 },
+        [uuid4()]: { emoji: '🧭', x: 0, y: 1, kind: 'chest', action: null, items: {}, hearts: 1 },
       }),
     [myUUId],
   )
@@ -78,8 +78,17 @@ function App() {
   function processSprites() {
     spriteOnSpriteEvent((sprites, subject, object, subjectUUId, objectUUId) => {
       const isSelf = subjectUUId === objectUUId
+      const subjectIsTapping = subject.action === 'tap'
+      const subjectIsMonster = subject.kind === 'monster'
+      const objectIsMonster = object.kind === 'monster'
+      const objectIsChest = object.kind === 'chest'
+      const objectIsItem = object.kind === 'item'
 
-      if (subject.kind === 'monster' && object.kind === 'item' && !isSelf) {
+      const pickingUp = subjectIsMonster && objectIsItem && !isSelf
+      const openingChest = subjectIsMonster && subjectIsTapping && objectIsChest && !isSelf
+      const attackingMonster = subjectIsMonster && subjectIsTapping && objectIsMonster && !isSelf
+
+      if (pickingUp) {
         const { sound, animationDuration } = mapItemOverrides[object.emoji] ?? {}
 
         if (sound) playSound(sound)
@@ -92,10 +101,11 @@ function App() {
           { duration: animationDuration ?? 1000, toasterId: subjectUUId },
         )
 
+        subject.items[object.emoji] = (subject.items[object.emoji] ?? 0) + 1
         delete sprites[objectUUId]
       }
 
-      if (subject.kind === 'monster' && subject.action === 'tap' && object.kind === 'chest' && !isSelf) {
+      if (openingChest) {
         playSound('openchest.mp3')
 
         toast(
@@ -105,11 +115,12 @@ function App() {
           { duration: 1750, toasterId: subjectUUId },
         )
 
+        subject.items[object.emoji] = (subject.items[object.emoji] ?? 0) + 1
         subject.action = null
         delete sprites[objectUUId]
       }
 
-      if (subject.kind === 'monster' && subject.action === 'tap' && object.kind === 'monster' && !isSelf) {
+      if (attackingMonster) {
         playSound('hit.wav')
 
         const dmg = ~~(random() * 1000) + 100
@@ -130,6 +141,29 @@ function App() {
             toasterId: objectUUId,
           },
         )
+
+        object.hearts = max(object.hearts - dmg, 0)
+
+        if (!object.hearts) {
+          for (const _emoji in object.items) {
+            const emoji = _emoji as Emoji
+            const count = object.items[emoji]!
+
+            for (let c = 0; c < count; c++) {
+              sprites[uuid4()] = {
+                emoji,
+                x: object.x,
+                y: object.y,
+                kind: 'item',
+                action: null,
+                items: {},
+                hearts: 1,
+              }
+            }
+          }
+
+          delete sprites[objectUUId]
+        }
 
         subject.action = null
       }
@@ -273,7 +307,7 @@ function App() {
 
   // const elDebug = (
   //   <div className="fixed top-0 left-0 bg-red-500/30">
-  //     <pre>{stringify({ cameraPosition }, null, 2)}</pre>
+  //     <pre>{stringify({ sprites }, null, 2)}</pre>
   //   </div>
   // )
 
