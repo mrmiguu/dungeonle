@@ -80,7 +80,7 @@ function App() {
       const isSelf = subjectUUId === objectUUId
 
       if (subject.kind === 'monster' && object.kind === 'item' && !isSelf) {
-        const { sound } = mapItemOverrides[object.emoji] ?? {}
+        const { sound, animationDuration } = mapItemOverrides[object.emoji] ?? {}
 
         if (sound) playSound(sound)
         else playSound('pickup.mp3')
@@ -89,7 +89,7 @@ function App() {
           <div className="flex items-center">
             +<EmojiStatic emoji={object.emoji} className="w-[8vmin] h-[8vmin]" />
           </div>,
-          { duration: 750, toasterId: subjectUUId },
+          { duration: animationDuration ?? 1000, toasterId: subjectUUId },
         )
 
         delete sprites[objectUUId]
