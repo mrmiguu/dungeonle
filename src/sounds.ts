@@ -1,7 +1,7 @@
 import { Howl } from 'howler'
 import { useEffect } from 'react'
 
-const sound_imports = import.meta.glob('./sounds/*.wav')
+const sound_imports = import.meta.glob('./sounds/*')
 
 async function sound(file: string) {
   if (!sound_cache.has(file)) {

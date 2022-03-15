@@ -181,14 +181,16 @@ const faceOverrides: Partial<{
   '🔒': { y: 7 },
 } as const
 
+type MapItemOverrideProps = Partial<{ className: string; scale: number; animation: string; sound: string }>
+
 const mapItemOverrides: Partial<{
-  [k in Emoji]: Partial<{ className: string; scale: number; animation: string }>
+  [k in Emoji]: MapItemOverrideProps
 }> = {
-  '🪙': { scale: 0.25, animation: 'animate-twist-fast' },
+  '🪙': { scale: 0.25, animation: 'animate-twist-fast', sound: 'coin.wav' },
 }
 
 type FaceOverride = keyof typeof faceOverrides
 type MapItemOverride = keyof typeof mapItemOverrides
 
-export type { Emoji, FaceOverride, MapItemOverride }
+export type { Emoji, FaceOverride, MapItemOverrideProps, MapItemOverride }
 export { openmoji_svg_color, emojis, faceOverrides, mapItemOverrides }

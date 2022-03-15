@@ -6,6 +6,7 @@ import { useInput } from './appHooks'
 import Camera from './Camera'
 import EmojiMapItem from './EmojiMapItem'
 import EmojiMonster from './EmojiMonster'
+import { mapItemOverrides } from './emojis'
 import EmojiStatic from './EmojiStatic'
 import { music_imports, useMusic } from './music'
 import { random } from './random'
@@ -38,85 +39,117 @@ function App() {
   useEffect(
     () =>
       void setSprites({
-        [myUUId]: { emoji: '🍳', x: 0, y: 0, kind: 'monster' },
-        [uuid4()]: { emoji: '🍎', x: 1, y: 1, kind: 'monster' },
-        [uuid4()]: { emoji: '🪙', x: 1, y: 2, kind: 'item' },
-        [uuid4()]: { emoji: '🪙', x: 2, y: 1, kind: 'item' },
-        [uuid4()]: { emoji: '🪙', x: 3, y: 2, kind: 'item' },
-        [uuid4()]: { emoji: '🪙', x: 4, y: 1, kind: 'item' },
-        [uuid4()]: { emoji: '🪙', x: 5, y: 2, kind: 'item' },
-        [uuid4()]: { emoji: '🪙', x: 6, y: 1, kind: 'item' },
-        [uuid4()]: { emoji: '🗺️', x: 3, y: 0, kind: 'item' },
-        [uuid4()]: { emoji: '🧭', x: 0, y: 1, kind: 'chest' },
+        [myUUId]: { emoji: '🍳', x: 0, y: 0, kind: 'monster', action: null },
+        [uuid4()]: { emoji: '🍎', x: 1, y: 1, kind: 'monster', action: null },
+        [uuid4()]: { emoji: '🪙', x: 1, y: 2, kind: 'item', action: null },
+        [uuid4()]: { emoji: '🪙', x: 2, y: 1, kind: 'item', action: null },
+        [uuid4()]: { emoji: '🪙', x: 3, y: 2, kind: 'item', action: null },
+        [uuid4()]: { emoji: '🪙', x: 4, y: 1, kind: 'item', action: null },
+        [uuid4()]: { emoji: '🪙', x: 5, y: 2, kind: 'item', action: null },
+        [uuid4()]: { emoji: '🪙', x: 6, y: 1, kind: 'item', action: null },
+        [uuid4()]: { emoji: '🗺️', x: 3, y: 0, kind: 'item', action: null },
+        [uuid4()]: { emoji: '🧭', x: 0, y: 1, kind: 'chest', action: null },
       }),
     [myUUId],
   )
 
-  function grab(
-    on: (sprites: SpriteMap, subject: Sprite, object: Sprite, subjectUUId: string, objectUUId: string) => void,
-  ) {
-    setSprites(
-      immer(sprites => {
-        for (const objectUUId in sprites) {
-          const object = sprites[objectUUId]!
-
-          for (const subjectUUId in sprites) {
-            const subject = sprites[subjectUUId]!
-
-            if (subject.x === object.x && subject.y === object.y) {
-              on(sprites, sprites[subjectUUId]!, sprites[objectUUId]!, subjectUUId, objectUUId)
-            }
-          }
-        }
-      }),
-    )
+  function editSprites(on: (sprites: SpriteMap) => void) {
+    setSprites(immer(sprites => on(sprites)))
   }
 
-  useEffect(() => {
-    grab((sprites, subject, object, subjectUUId, objectUUId) => {
-      if (object.emoji === '🪙' && object.kind === 'item' && subject.kind === 'monster') {
-        playSound('coin.wav')
+  function spriteOnSpriteEvent(
+    on: (sprites: SpriteMap, subject: Sprite, object: Sprite, subjectUUId: string, objectUUId: string) => void,
+  ) {
+    editSprites(sprites => {
+      for (const objectUUId in sprites) {
+        const object = sprites[objectUUId]!
+
+        for (const subjectUUId in sprites) {
+          const subject = sprites[subjectUUId]!
+
+          if (subject.x === object.x && subject.y === object.y) {
+            on(sprites, subject, object, subjectUUId, objectUUId)
+          }
+        }
+      }
+    })
+  }
+
+  function processSprites() {
+    spriteOnSpriteEvent((sprites, subject, object, subjectUUId, objectUUId) => {
+      const isSelf = subjectUUId === objectUUId
+
+      if (subject.kind === 'monster' && object.kind === 'item' && !isSelf) {
+        const { sound } = mapItemOverrides[object.emoji] ?? {}
+
+        if (sound) playSound(sound)
+        else playSound('pickup.mp3')
 
         toast(
           <div className="flex items-center">
-            +<EmojiStatic emoji="🪙" className="w-[8vmin] h-[8vmin]" />
+            +<EmojiStatic emoji={object.emoji} className="w-[8vmin] h-[8vmin]" />
           </div>,
           { duration: 750, toasterId: subjectUUId },
         )
 
         delete sprites[objectUUId]
       }
+
+      if (subject.kind === 'monster' && subject.action === 'tap' && object.kind === 'chest' && !isSelf) {
+        playSound('openchest.mp3')
+
+        toast(
+          <div className="flex items-center">
+            +<EmojiStatic emoji={object.emoji} className="w-[8vmin] h-[8vmin]" />
+          </div>,
+          { duration: 1750, toasterId: subjectUUId },
+        )
+
+        subject.action = null
+        delete sprites[objectUUId]
+      }
+
+      if (subject.kind === 'monster' && subject.action === 'tap' && object.kind === 'monster' && !isSelf) {
+        playSound('hit.wav')
+
+        const dmg = ~~(random() * 1000) + 100
+        const gradient = gradients.normal
+
+        toast(
+          <div
+            className="font-[DamageFont] font-bold text-[20vmin] leading-none px-2 text-transparent bg-clip-text"
+            style={{
+              backgroundImage: `linear-gradient(to bottom, ${gradient[0]} 30%, ${gradient[1]} 70%)`,
+            }}
+          >
+            {dmg}
+          </div>,
+          {
+            className: '-mt-[20vmin] p-0',
+            duration: 500,
+            toasterId: objectUUId,
+          },
+        )
+
+        subject.action = null
+      }
     })
+  }
+
+  useEffect(() => {
+    processSprites()
   }, [sprites])
 
-  function interact(uuid: string, kind: Sprite['kind']) {
-    if (kind === 'monster') {
-      playSound('hit.wav')
-
-      const dmg = ~~(random() * 1000) + 100
-      const gradient = gradients.normal
-
-      toast(
-        <div
-          className="font-[DamageFont] font-bold text-[20vmin] leading-none px-2 text-transparent bg-clip-text"
-          style={{
-            backgroundImage: `linear-gradient(to bottom, ${gradient[0]} 30%, ${gradient[1]} 70%)`,
-          }}
-        >
-          {dmg}
-        </div>,
-        {
-          className: '-mt-[20vmin] p-0',
-          duration: 500,
-          toasterId: uuid,
-        },
-      )
-    }
+  function haveSpriteTap(uuid: string) {
+    editSprites(sprites => {
+      const sprite = sprites[uuid]
+      if (sprite) sprite.action = 'tap'
+    })
   }
 
   function move(mutate: (sprites: SpriteMap) => void) {
     playSound('move.wav')
-    setSprites(immer<SpriteMap>(mutate))
+    editSprites(mutate)
   }
 
   const moveUp = (uuid = myUUId) =>
@@ -145,14 +178,7 @@ function App() {
   useInput(
     {
       tap() {
-        if (!mySprite) return
-
-        for (const uuid in sprites) {
-          const { x, y, kind } = sprites[uuid]!
-          const onSameTile = x === mySprite.x && y === mySprite.y
-
-          if (onSameTile && uuid !== myUUId) interact(uuid, kind)
-        }
+        haveSpriteTap(myUUId)
       },
       up() {
         moveUp()
@@ -186,7 +212,6 @@ function App() {
             transform: `translate(${100 * x}%,${100 * y}%)`,
             zIndex: y * 2 + (kind === 'monster' ? 1 : 0),
           }}
-          // onClick={() => toast(`Clicked tile ${stringify([x, y])}`)}
         >
           <div className="flex items-center justify-center">
             {kind === 'monster' && (
@@ -210,7 +235,9 @@ function App() {
               </>
             )}
             {kind === 'item' && <EmojiMapItem emoji={emoji} className="absolute w-full h-full" />}
-            {kind === 'chest' && <EmojiMapItem emoji="📦" className="absolute w-full h-full scale-150 animate-none" />}
+            {kind === 'chest' && (
+              <EmojiMapItem emoji="📦" className="absolute w-full h-full" animation="animate-none" scale={0.75} />
+            )}
           </div>
         </div>
       ))}
@@ -236,7 +263,6 @@ function App() {
             className={`relative flex items-center justify-center w-full h-full shrink-0 ${
               tr ? 'rounded-tr-full' : br ? 'rounded-br-full' : bl ? 'rounded-bl-full' : tl ? 'rounded-tl-full' : null
             } ${(x % 2 === 0 && y % 2 === 0) || (x % 2 === 1 && y % 2 === 1) ? 'bg-green-400' : 'bg-green-500'}`}
-            // onClick={() => toast(`Clicked tile ${stringify([x, y])}`)}
           >
             <div className="flex items-end justify-center">{/* TODO: add static tile things here */}</div>
           </div>
