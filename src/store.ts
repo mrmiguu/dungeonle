@@ -4,13 +4,13 @@ import create from 'zustand'
 import { Emoji } from './emojis'
 
 type Sprite = {
+  kind: 'player' | 'npc' | 'item' | 'chest'
   emoji: Emoji
   x: number
   y: number
-  kind: 'monster' | 'item' | 'chest'
+  hearts: number
   action: 'tap' | null
   items: Partial<{ [emoji in Emoji]: number }>
-  hearts: number
 }
 type SpriteMap = { [uuid: string]: Sprite }
 

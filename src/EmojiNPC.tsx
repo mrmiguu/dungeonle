@@ -1,15 +1,15 @@
 import { useMemo } from 'react'
 import useAsync from 'react-use/lib/useAsync'
 import BlackBeadyEye from './BlackBeadyEye'
-import { Emoji, FaceOverride, faceOverrides, openmoji_svg_color } from './emojis'
+import { FaceOverride, faceOverrides, NPCEmoji, openmoji_svg_color } from './emojis'
 import Mouth from './Mouth'
 import { mouths } from './mouths'
 import { random } from './random'
 import { abs, keys, log, stringify, unicode } from './utils'
 
-type EmojiMonsterProps = { emoji: Emoji; className?: string }
+type EmojiNPCProps = { emoji: NPCEmoji; className?: string }
 
-function EmojiMonster({ emoji, className }: EmojiMonsterProps) {
+function EmojiNPC({ emoji, className }: EmojiNPCProps) {
   const uniqueAnimationTimeOffset = useMemo(() => ~~(random(emoji) * 3000), [emoji])
 
   const faceOverride = faceOverrides[emoji as FaceOverride]
@@ -66,7 +66,7 @@ function EmojiMonster({ emoji, className }: EmojiMonsterProps) {
         className="relative w-full max-h-full origin-bottom aspect-square animate-breathe"
         style={{ animationDelay: `${-uniqueAnimationTimeOffset}ms` }}
       >
-        {emojiSVG && <img className="w-full h-full" src={emojiSVG} alt="monster emoji" />}
+        {emojiSVG && <img className="w-full h-full" src={emojiSVG} alt="npc emoji" />}
 
         <div
           className="absolute top-0 left-0 flex items-center justify-center w-full h-full"
@@ -86,4 +86,4 @@ function EmojiMonster({ emoji, className }: EmojiMonsterProps) {
   return el
 }
 
-export default EmojiMonster
+export default EmojiNPC

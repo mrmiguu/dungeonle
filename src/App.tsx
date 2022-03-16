@@ -5,10 +5,11 @@ import { v4 as uuid4 } from 'uuid'
 import { useInput } from './appHooks'
 import Camera from './Camera'
 import EmojiMapItem from './EmojiMapItem'
-import EmojiMonster from './EmojiMonster'
+import EmojiNPC from './EmojiNPC'
+import EmojiPlayer from './EmojiPlayer'
 import { Emoji, mapItemOverrides } from './emojis'
 import EmojiStatic from './EmojiStatic'
-import { music_imports, useMusic } from './music'
+import { music_imports } from './music'
 import { random } from './random'
 import { playSound } from './sounds'
 import { Sprite, SpriteMap } from './store'
@@ -29,7 +30,7 @@ function App() {
     return musicPaths[~~(random() * musicPaths.length)]!
   }, [])
 
-  useMusic(randomMusic, true)
+  // useMusic(randomMusic, true)
 
   const myUUId = useMemo(() => uuid4(), [])
 
@@ -39,8 +40,8 @@ function App() {
   useEffect(
     () =>
       void setSprites({
-        [myUUId]: { emoji: '🍳', x: 0, y: 0, kind: 'monster', action: null, items: {}, hearts: 10000 },
-        [uuid4()]: { emoji: '🍎', x: 1, y: 1, kind: 'monster', action: null, items: { '❤️': 1, '🪙': 2 }, hearts: 5000 },
+        [myUUId]: { emoji: '😎', x: 0, y: 0, kind: 'player', action: null, items: {}, hearts: 10000 },
+        [uuid4()]: { emoji: '🍎', x: 1, y: 1, kind: 'npc', action: null, items: { '❤️': 1, '🪙': 2 }, hearts: 5000 },
         [uuid4()]: { emoji: '🪙', x: 1, y: 2, kind: 'item', action: null, items: {}, hearts: 1 },
         [uuid4()]: { emoji: '🪙', x: 2, y: 1, kind: 'item', action: null, items: {}, hearts: 1 },
         [uuid4()]: { emoji: '🪙', x: 3, y: 2, kind: 'item', action: null, items: {}, hearts: 1 },
@@ -79,14 +80,14 @@ function App() {
     spriteOnSpriteEvent((sprites, subject, object, subjectUUId, objectUUId) => {
       const isSelf = subjectUUId === objectUUId
       const subjectIsTapping = subject.action === 'tap'
-      const subjectIsMonster = subject.kind === 'monster'
-      const objectIsMonster = object.kind === 'monster'
+      const subjectIsCharacter = subject.kind === 'player' || subject.kind === 'npc'
+      const objectIsCharacter = object.kind === 'player' || object.kind === 'npc'
       const objectIsChest = object.kind === 'chest'
       const objectIsItem = object.kind === 'item'
 
-      const pickingUp = subjectIsMonster && objectIsItem && !isSelf
-      const openingChest = subjectIsMonster && subjectIsTapping && objectIsChest && !isSelf
-      const attackingMonster = subjectIsMonster && subjectIsTapping && objectIsMonster && !isSelf
+      const pickingUp = subjectIsCharacter && objectIsItem && !isSelf
+      const openingChest = subjectIsCharacter && subjectIsTapping && objectIsChest && !isSelf
+      const attackingCharacter = subjectIsCharacter && subjectIsTapping && objectIsCharacter && !isSelf
 
       if (pickingUp) {
         const { sound, animationDuration } = mapItemOverrides[object.emoji] ?? {}
@@ -120,7 +121,7 @@ function App() {
         delete sprites[objectUUId]
       }
 
-      if (attackingMonster) {
+      if (attackingCharacter) {
         playSound('hit.wav')
 
         const dmg = ~~(random() * 1000) + 100
@@ -241,44 +242,49 @@ function App() {
 
   const elSprites = (
     <div className="absolute top-0 left-0 w-full h-full">
-      {entries(sprites).map(([uuid, { emoji, x, y, kind }]) => (
-        <div
-          key={uuid}
-          className="absolute top-0 left-0 flex items-center justify-center transition-transform duration-1250 ease-out-expo"
-          style={{
-            ...styleSpriteTile,
-            transform: `translate(${100 * x}%,${100 * y}%)`,
-            zIndex: y * 2 + (kind === 'monster' ? 1 : 0),
-          }}
-        >
-          <div className="flex items-center justify-center">
-            {kind === 'monster' && (
-              <>
-                <EmojiMonster emoji={emoji} className="absolute w-full h-full" />
-                <Toaster
-                  position="bottom-center"
-                  containerStyle={{
-                    position: 'absolute',
-                    left: 0,
-                    top: 0,
-                    right: 0,
-                    bottom: 0,
-                    width: `${100}%`,
-                    height: `${100}%`,
-                    transform: `translate(${0}%,${-100}%)`,
-                  }}
-                  reverseOrder
-                  toasterId={uuid}
-                />
-              </>
-            )}
-            {kind === 'item' && <EmojiMapItem emoji={emoji} className="absolute w-full h-full" />}
-            {kind === 'chest' && (
-              <EmojiMapItem emoji="📦" className="absolute w-full h-full" animation="animate-none" scale={0.75} />
-            )}
+      {entries(sprites).map(([uuid, { emoji, x, y, kind }]) => {
+        const isCharacter = kind === 'player' || kind === 'npc'
+
+        return (
+          <div
+            key={uuid}
+            className="absolute top-0 left-0 flex items-center justify-center transition-transform duration-1250 ease-out-expo"
+            style={{
+              ...styleSpriteTile,
+              transform: `translate(${100 * x}%,${100 * y}%)`,
+              zIndex: y * 2 + (isCharacter ? 1 : 0),
+            }}
+          >
+            <div className="flex items-center justify-center">
+              {isCharacter && (
+                <>
+                  {kind === 'player' && <EmojiPlayer emoji={emoji as any} className="absolute w-full h-full" />}
+                  {kind === 'npc' && <EmojiNPC emoji={emoji as any} className="absolute w-full h-full" />}
+                  <Toaster
+                    position="bottom-center"
+                    containerStyle={{
+                      position: 'absolute',
+                      left: 0,
+                      top: 0,
+                      right: 0,
+                      bottom: 0,
+                      width: `${100}%`,
+                      height: `${100}%`,
+                      transform: `translate(${0}%,${-100}%)`,
+                    }}
+                    reverseOrder
+                    toasterId={uuid}
+                  />
+                </>
+              )}
+              {kind === 'item' && <EmojiMapItem emoji={emoji} className="absolute w-full h-full" />}
+              {kind === 'chest' && (
+                <EmojiMapItem emoji="📦" className="absolute w-full h-full" animation="animate-none" scale={0.75} />
+              )}
+            </div>
           </div>
-        </div>
-      ))}
+        )
+      })}
     </div>
   )
 

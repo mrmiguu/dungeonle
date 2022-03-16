@@ -2,12 +2,101 @@ import { MouthKind } from './mouths'
 
 const openmoji_svg_color = import.meta.glob('./openmoji-svg-color/*.svg')
 
-const emojis = [
-  '❤',
-  '🗺️',
-  '🧭',
-  '📦',
-  '🪙',
+const playerEmojis = [
+  '😀',
+  '😃',
+  '😄',
+  '😁',
+  '😆',
+  '😅',
+  '😂',
+  '🤣',
+  '🥲',
+  '☺️',
+  '😊',
+  '😇',
+  '🙂',
+  '🙃',
+  '😉',
+  '😌',
+  '😍',
+  '🥰',
+  '😘',
+  '😗',
+  '😙',
+  '😚',
+  '😋',
+  '😛',
+  '😝',
+  '😜',
+  '🤪',
+  '🤨',
+  '🧐',
+  '🤓',
+  '😎',
+  '🥸',
+  '🤩',
+  '🥳',
+  '😏',
+  '😒',
+  '😞',
+  '😔',
+  '😟',
+  '😕',
+  '🙁',
+  '☹️',
+  '😣',
+  '😖',
+  '😫',
+  '😩',
+  '🥺',
+  '😢',
+  '😭',
+  '😤',
+  '😠',
+  '🤯',
+  '😳',
+  '😶‍🌫️',
+  '😱',
+  '😨',
+  '😰',
+  '😥',
+  '😓',
+  '🤗',
+  '🤔',
+  '🤭',
+  '🤫',
+  '🤥',
+  '😶',
+  '😐',
+  '😑',
+  '😬',
+  '🙄',
+  '😯',
+  '😦',
+  '😧',
+  '😮',
+  '😲',
+  '🥱',
+  '😴',
+  '🤤',
+  '😪',
+  '😮‍💨',
+  '😵',
+  '😵‍💫',
+  '🤐',
+  '🥴',
+  '🤧',
+  '😷',
+  '🤒',
+  '🤕',
+  '🤑',
+  '🤠',
+] as const
+
+const itemEmojis = ['❤', '🗺️', '🧭', '📦', '🪙'] as const
+
+const npcEmojis = [
   '⭐️',
   '🍳',
   '🧀',
@@ -108,6 +197,11 @@ const emojis = [
   '🔒',
 ] as const
 
+const emojis = [...playerEmojis, ...itemEmojis, ...npcEmojis] as const
+
+type PlayerEmoji = typeof playerEmojis[number]
+type ItemEmoji = typeof itemEmojis[number]
+type NPCEmoji = typeof npcEmojis[number]
 type Emoji = typeof emojis[number]
 
 const faceOverrides: Partial<{
@@ -199,5 +293,5 @@ const mapItemOverrides: Partial<{
 type FaceOverride = keyof typeof faceOverrides
 type MapItemOverride = keyof typeof mapItemOverrides
 
-export type { Emoji, FaceOverride, MapItemOverrideProps, MapItemOverride }
+export type { PlayerEmoji, ItemEmoji, NPCEmoji, Emoji, FaceOverride, MapItemOverrideProps, MapItemOverride }
 export { openmoji_svg_color, emojis, faceOverrides, mapItemOverrides }
