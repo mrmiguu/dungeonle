@@ -7,9 +7,9 @@ import Camera from './Camera'
 import EmojiMapItem from './EmojiMapItem'
 import EmojiNPC from './EmojiNPC'
 import EmojiPlayer from './EmojiPlayer'
-import { Emoji, mapItemOverrides } from './emojis'
+import { ItemEmoji, mapItemOverrides } from './emojis'
 import EmojiStatic from './EmojiStatic'
-import { music_imports } from './music'
+import { music_imports, useMusic } from './music'
 import { random } from './random'
 import { playSound } from './sounds'
 import { Sprite, SpriteMap } from './store'
@@ -30,7 +30,7 @@ function App() {
     return musicPaths[~~(random() * musicPaths.length)]!
   }, [])
 
-  // useMusic(randomMusic, true)
+  useMusic(randomMusic, true)
 
   const myUUId = useMemo(() => uuid4(), [])
 
@@ -42,14 +42,14 @@ function App() {
       void setSprites({
         [myUUId]: { emoji: '😎', x: 0, y: 0, kind: 'player', action: null, items: {}, hearts: 10000 },
         [uuid4()]: { emoji: '🍎', x: 1, y: 1, kind: 'npc', action: null, items: { '❤️': 1, '🪙': 2 }, hearts: 5000 },
-        [uuid4()]: { emoji: '🪙', x: 1, y: 2, kind: 'item', action: null, items: {}, hearts: 1 },
-        [uuid4()]: { emoji: '🪙', x: 2, y: 1, kind: 'item', action: null, items: {}, hearts: 1 },
-        [uuid4()]: { emoji: '🪙', x: 3, y: 2, kind: 'item', action: null, items: {}, hearts: 1 },
-        [uuid4()]: { emoji: '🪙', x: 4, y: 1, kind: 'item', action: null, items: {}, hearts: 1 },
-        [uuid4()]: { emoji: '🪙', x: 5, y: 2, kind: 'item', action: null, items: {}, hearts: 1 },
-        [uuid4()]: { emoji: '🪙', x: 6, y: 1, kind: 'item', action: null, items: {}, hearts: 1 },
-        [uuid4()]: { emoji: '🗺️', x: 3, y: 0, kind: 'chest', action: null, items: {}, hearts: 1 },
-        [uuid4()]: { emoji: '🧭', x: 0, y: 1, kind: 'chest', action: null, items: {}, hearts: 1 },
+        [uuid4()]: { emoji: '🪙', x: 1, y: 2, kind: 'item' },
+        [uuid4()]: { emoji: '🪙', x: 2, y: 1, kind: 'item' },
+        [uuid4()]: { emoji: '🪙', x: 3, y: 2, kind: 'item' },
+        [uuid4()]: { emoji: '🪙', x: 4, y: 1, kind: 'item' },
+        [uuid4()]: { emoji: '🪙', x: 5, y: 2, kind: 'item' },
+        [uuid4()]: { emoji: '🪙', x: 6, y: 1, kind: 'item' },
+        [uuid4()]: { emoji: '🗺️', x: 3, y: 0, kind: 'chest' },
+        [uuid4()]: { emoji: '🧭', x: 0, y: 1, kind: 'chest' },
       }),
     [myUUId],
   )
@@ -79,7 +79,7 @@ function App() {
   function processSprites() {
     spriteOnSpriteEvent((sprites, subject, object, subjectUUId, objectUUId) => {
       const isSelf = subjectUUId === objectUUId
-      const subjectIsTapping = subject.action === 'tap'
+      const subjectIsTapping = 'action' in subject && subject.action === 'tap'
       const subjectIsCharacter = subject.kind === 'player' || subject.kind === 'npc'
       const objectIsCharacter = object.kind === 'player' || object.kind === 'npc'
       const objectIsChest = object.kind === 'chest'
@@ -147,18 +147,15 @@ function App() {
 
         if (!object.hearts) {
           for (const _emoji in object.items) {
-            const emoji = _emoji as Emoji
+            const emoji = _emoji as ItemEmoji
             const count = object.items[emoji]!
 
             for (let c = 0; c < count; c++) {
               sprites[uuid4()] = {
+                kind: 'item',
                 emoji,
                 x: object.x,
                 y: object.y,
-                kind: 'item',
-                action: null,
-                items: {},
-                hearts: 1,
               }
             }
           }
@@ -178,7 +175,7 @@ function App() {
   function haveSpriteTap(uuid: string) {
     editSprites(sprites => {
       const sprite = sprites[uuid]
-      if (sprite) sprite.action = 'tap'
+      if (sprite && 'action' in sprite) sprite.action = 'tap'
     })
   }
 
@@ -189,23 +186,27 @@ function App() {
 
   const moveUp = (uuid = myUUId) =>
     move(sprites => {
-      sprites[uuid]!.y--
-      sprites[uuid]!.action = null
+      const sprite = sprites[uuid]!
+      sprite.y--
+      if ('action' in sprite) sprite.action = null
     })
   const moveLeft = (uuid = myUUId) =>
     move(sprites => {
-      sprites[uuid]!.x--
-      sprites[uuid]!.action = null
+      const sprite = sprites[uuid]!
+      sprite.x--
+      if ('action' in sprite) sprite.action = null
     })
   const moveDown = (uuid = myUUId) =>
     move(sprites => {
-      sprites[uuid]!.y++
-      sprites[uuid]!.action = null
+      const sprite = sprites[uuid]!
+      sprite.y++
+      if ('action' in sprite) sprite.action = null
     })
   const moveRight = (uuid = myUUId) =>
     move(sprites => {
-      sprites[uuid]!.x++
-      sprites[uuid]!.action = null
+      const sprite = sprites[uuid]!
+      sprite.x++
+      if ('action' in sprite) sprite.action = null
     })
 
   const [mapWidth, mapHeight] = useMemo(() => [8, 4], [])

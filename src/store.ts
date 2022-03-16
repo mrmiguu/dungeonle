@@ -1,17 +1,44 @@
 import produce from 'immer'
 import { useEffect } from 'react'
 import create from 'zustand'
-import { Emoji } from './emojis'
+import { ItemEmoji, NPCEmoji, PlayerEmoji } from './emojis'
 
-type Sprite = {
-  kind: 'player' | 'npc' | 'item' | 'chest'
-  emoji: Emoji
+type PlayerSprite = {
+  kind: 'player'
+  emoji: PlayerEmoji
   x: number
   y: number
   hearts: number
   action: 'tap' | null
-  items: Partial<{ [emoji in Emoji]: number }>
+  items: Partial<{ [emoji in ItemEmoji]: number }>
 }
+
+type NPCSprite = {
+  kind: 'npc'
+  emoji: NPCEmoji
+  x: number
+  y: number
+  hearts: number
+  action: 'tap' | null
+  items: Partial<{ [emoji in ItemEmoji]: number }>
+}
+
+type ItemSprite = {
+  kind: 'item'
+  emoji: ItemEmoji
+  x: number
+  y: number
+}
+
+type ChestSprite = {
+  kind: 'chest'
+  emoji: ItemEmoji
+  x: number
+  y: number
+}
+
+type Sprite = PlayerSprite | NPCSprite | ItemSprite | ChestSprite
+
 type SpriteMap = { [uuid: string]: Sprite }
 
 type SpriteStore = {

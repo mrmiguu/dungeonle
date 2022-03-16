@@ -94,7 +94,7 @@ const playerEmojis = [
   '🤠',
 ] as const
 
-const itemEmojis = ['❤', '🗺️', '🧭', '📦', '🪙'] as const
+const itemEmojis = ['❤️', '🗺️', '🧭', '📦', '🪙'] as const
 
 const npcEmojis = [
   '⭐️',
