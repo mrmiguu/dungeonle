@@ -14,7 +14,7 @@ type generateWhiteNoiseProps = {
   seed?: string
 }
 
-function generateWhiteNoise({ size, whiteLevel = 0.6, seed }: generateWhiteNoiseProps): Cell[] {
+function generateWhiteNoise({ size, whiteLevel = 0.5, seed }: generateWhiteNoiseProps): Cell[] {
   return [...Array(size)].map(() => (random(seed) >= whiteLevel ? '⬛️' : '⬜️'))
 }
 
@@ -50,37 +50,30 @@ function areMatricesDifferent(matrixA: Cell[][] | undefined, matrixB: Cell[][] |
   return stringify(matrixA) !== stringify(matrixB)
 }
 
-function draw(terrain_matrix: Cell[][]): string[] {
+function drawMatrix(terrain_matrix: Cell[][]): string[] {
   return terrain_matrix.map(pixelsRow => pixelsRow.join(''))
 }
 
-function generateCellularAutomaton(seed?: string) {
-  const CANVAS_HEIGHT = 400
-  const CANVAS_WIDTH = 400
-
-  const PIXEL_RATIO = 10
-  const MATRIX_DIMENSIONS = {
-    height: CANVAS_HEIGHT / PIXEL_RATIO,
-    width: CANVAS_WIDTH / PIXEL_RATIO,
-  } as const
-
-  const matrices = {
-    last: undefined as Cell[][] | undefined,
-    current: [] as Cell[][],
-  }
-
-  matrices.current = [...Array(MATRIX_DIMENSIONS.height)].map(() => {
-    return generateWhiteNoise({ size: MATRIX_DIMENSIONS.width, whiteLevel: 0.5, seed })
-  })
-
-  let count = 0
-  const ITERATIONS_LIMIT = 100
-  while (areMatricesDifferent(matrices.current, matrices.last) || count > ITERATIONS_LIMIT) {
-    matrices.last = matrices.current
-    matrices.current = cellularAutomaton(matrices.last)
-  }
-
-  return draw(matrices.current)
+type generateCellularAutomatonProps = {
+  width: number
+  height: number
+  whiteLevel?: number
+  seed?: string
 }
 
-export { generateCellularAutomaton, generateWhiteNoise }
+function generateCellularAutomaton({ width, height, whiteLevel = 0.5, seed }: generateCellularAutomatonProps) {
+  let currentMatrix: Cell[][] = [...Array(height)].map(() => generateWhiteNoise({ size: width, whiteLevel, seed }))
+  let lastMatrix: Cell[][] | undefined = undefined
+
+  let count = 0
+  const iterationsLimit = 100
+  while (areMatricesDifferent(currentMatrix, lastMatrix) || count > iterationsLimit) {
+    lastMatrix = currentMatrix
+    currentMatrix = cellularAutomaton(lastMatrix)
+  }
+
+  return currentMatrix
+}
+
+export type { Black, White, Cell }
+export { generateCellularAutomaton, generateWhiteNoise, drawMatrix }

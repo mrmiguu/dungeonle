@@ -40,7 +40,7 @@ function EmojiPlayer({ emoji, className }: EmojiPlayerProps) {
         className="relative w-full max-h-full origin-bottom aspect-square animate-breathe"
         style={{ animationDelay: `${-uniqueAnimationTimeOffset}ms` }}
       >
-        {emojiSVG && <img className="w-full h-full" src={emojiSVG} alt="player emoji" />}
+        {emojiSVG && <img className="w-full h-full grayscale" src={emojiSVG} alt="player emoji" />}
       </div>
     </div>
   )

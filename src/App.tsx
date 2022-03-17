@@ -4,16 +4,18 @@ import toast, { Toaster } from 'react-hot-toast'
 import { v4 as uuid4 } from 'uuid'
 import { useInput } from './appHooks'
 import Camera from './Camera'
+import { drawMatrix } from './cellularAutomaton'
 import EmojiMapItem from './EmojiMapItem'
 import EmojiNPC from './EmojiNPC'
 import EmojiPlayer from './EmojiPlayer'
 import { ItemEmoji, mapItemOverrides } from './emojis'
 import EmojiStatic from './EmojiStatic'
+import { getRawMap, getRawTile } from './maps'
 import { music_imports, useMusic } from './music'
 import { random } from './random'
 import { playSound } from './sounds'
 import { Sprite, SpriteMap } from './store'
-import { entries, keys, max } from './utils'
+import { entries, keys, log, max, stringify } from './utils'
 
 const gradients = {
   normal: ['red', 'yellow'],
@@ -24,6 +26,11 @@ const gradients = {
 
 function App() {
   // toast('<App>')
+
+  const rawMap = useMemo(() => getRawMap(24, 24), [])
+  useEffect(() => {
+    log(stringify(drawMatrix(rawMap), null, 2))
+  }, [rawMap])
 
   const randomMusic = useMemo(() => {
     const musicPaths = keys(music_imports)
@@ -294,6 +301,30 @@ function App() {
     height: `${100 * tileHeight}%`,
   }
 
+  const elTilesV2 = rawMap.map((row, y) => (
+    <div key={`${y}`} className="flex" style={styleTileRow}>
+      {row.map((cell, x) => {
+        const isTile = cell === '⬜️'
+        const tr = isTile && getRawTile(rawMap, x + 1, y) === '⬛️' && getRawTile(rawMap, x, y - 1) === '⬛️'
+        const br = isTile && getRawTile(rawMap, x + 1, y) === '⬛️' && getRawTile(rawMap, x, y + 1) === '⬛️'
+        const bl = isTile && getRawTile(rawMap, x - 1, y) === '⬛️' && getRawTile(rawMap, x, y + 1) === '⬛️'
+        const tl = isTile && getRawTile(rawMap, x - 1, y) === '⬛️' && getRawTile(rawMap, x, y - 1) === '⬛️'
+        const isEven = (x % 2 === 0 && y % 2 === 0) || (x % 2 === 1 && y % 2 === 1)
+
+        return (
+          <div
+            key={`${x}`}
+            className={`relative flex items-center justify-center w-full h-full shrink-0 ${
+              tr ? 'rounded-tr-full' : br ? 'rounded-br-full' : bl ? 'rounded-bl-full' : tl ? 'rounded-tl-full' : null
+            } ${isTile ? (isEven ? 'bg-green-400' : 'bg-green-500') : 'bg-transparent'}`}
+          >
+            <div className="flex items-end justify-center">{/* TODO: add static tile things here */}</div>
+          </div>
+        )
+      })}
+    </div>
+  ))
+
   const elTiles = [...Array(mapHeight)].map((_, y) => (
     <div key={`${y}`} className="flex" style={styleTileRow}>
       {[...Array(mapWidth)].map((_, x) => {
@@ -335,7 +366,7 @@ function App() {
             mapWidth={mapWidth}
             mapHeight={mapHeight}
           >
-            {elTiles}
+            {elTilesV2}
             {elSprites}
           </Camera>
         </div>
