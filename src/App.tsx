@@ -4,13 +4,12 @@ import toast, { Toaster } from 'react-hot-toast'
 import { v4 as uuid4 } from 'uuid'
 import { useInput } from './appHooks'
 import Camera from './Camera'
-import { drawMatrix } from './cellularAutomaton'
 import EmojiMapItem from './EmojiMapItem'
 import EmojiNPC from './EmojiNPC'
 import EmojiPlayer from './EmojiPlayer'
 import { ItemEmoji, mapItemOverrides } from './emojis'
 import EmojiStatic from './EmojiStatic'
-import { getRawMap, getRawTile } from './maps'
+import { drawMap, getRawMap, getRawTile } from './maps'
 import { music_imports, useMusic } from './music'
 import { random } from './random'
 import { playSound } from './sounds'
@@ -29,7 +28,7 @@ function App() {
 
   const rawMap = useMemo(() => getRawMap(24, 24), [])
   useEffect(() => {
-    log(stringify(drawMatrix(rawMap), null, 2))
+    log(stringify(drawMap(rawMap), null, 2))
   }, [rawMap])
 
   const randomMusic = useMemo(() => {

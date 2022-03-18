@@ -1,14 +1,31 @@
-import { Cell, generateCellularAutomaton } from './cellularAutomaton'
+import { cells, generateCellularAutomaton } from './cellularAutomaton'
 import { Tuple } from './types'
 
-type Map<W extends number, H extends number> = Tuple<Tuple<Cell, W>, H>
+const tiles = {
+  ...cells,
+  chest: '🟫',
+  boss: '🟥',
+  miniboss: '🟧',
+  coin: '🟨',
+  monster: '🟩',
+  warp: '🟦',
+  player: '🟪',
+} as const
+
+type Tile = typeof tiles[keyof typeof tiles]
+
+type Map<W extends number, H extends number> = Tuple<Tuple<Tile, W>, H>
 
 function getRawMap<W extends number, H extends number>(width: W, height: H): Map<W, H> {
-  return generateCellularAutomaton({ width, height, whiteLevel: 0.5, seed: `dungeonle-${1}` }) as any
+  return generateCellularAutomaton({ width, height, whiteLevel: 0.5, seed: `dungeonle-${1}` })
 }
 
-function getRawTile<W extends number, H extends number>(rawMap: Map<W, H>, x: number, y: number): Cell {
+function getRawTile<W extends number, H extends number>(rawMap: Map<W, H>, x: number, y: number): Tile {
   return rawMap[y]?.[x] ?? '⬛️'
 }
 
-export { getRawMap, getRawTile }
+function drawMap<W extends number, H extends number>(map: Map<W, H>) {
+  return map.map(pixelsRow => pixelsRow.join('')) as Tuple<string, H>
+}
+
+export { getRawMap, getRawTile, drawMap }
