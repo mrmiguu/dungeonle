@@ -110,16 +110,35 @@ function App() {
     spriteOnSpriteEvent((sprites, subject, object, subjectUUId, objectUUId) => {
       const isSelf = subjectUUId === objectUUId
       const subjectIsTapping = 'action' in subject && subject.action === 'tap'
+      const subjectIsMovingUp = 'action' in subject && subject.action === 'up'
+      const subjectIsMovingLeft = 'action' in subject && subject.action === 'left'
+      const subjectIsMovingDown = 'action' in subject && subject.action === 'down'
+      const subjectIsMovingRight = 'action' in subject && subject.action === 'right'
       const subjectIsCharacter = subject.kind === 'player' || subject.kind === 'npc'
       const objectIsCharacter = object.kind === 'player' || object.kind === 'npc'
       const objectIsChest = object.kind === 'chest'
       const objectIsItem = object.kind === 'item'
       const objectIsWarp = object.kind === 'warp'
 
+      const moving =
+        subjectIsCharacter &&
+        (subjectIsMovingUp || subjectIsMovingLeft || subjectIsMovingDown || subjectIsMovingRight) &&
+        isSelf
       const pickingUp = subjectIsCharacter && objectIsItem && !isSelf
       const openingChest = subjectIsCharacter && subjectIsTapping && objectIsChest && !isSelf
       const attackingCharacter = subjectIsCharacter && subjectIsTapping && objectIsCharacter && !isSelf
       const warping = subjectIsCharacter && objectIsWarp && subjectIsTapping && !isSelf
+
+      if (moving) {
+        playSound('move.wav')
+
+        if (subjectIsMovingUp) subject.y--
+        if (subjectIsMovingLeft) subject.x--
+        if (subjectIsMovingDown) subject.y++
+        if (subjectIsMovingRight) subject.x++
+
+        subject.action = null
+      }
 
       if (pickingUp) {
         const { sound, animationDuration } = mapItemOverrides[object.emoji] ?? {}
@@ -221,34 +240,25 @@ function App() {
     })
   }
 
-  function move(mutate: (sprites: SpriteMap) => void) {
-    playSound('move.wav')
-    editSprites(mutate)
-  }
-
-  const moveUp = (uuid = myUUId) =>
-    move(sprites => {
+  const haveSpriteMoveUp = (uuid: string) =>
+    editSprites(sprites => {
       const sprite = sprites[uuid]!
-      sprite.y--
-      if ('action' in sprite) sprite.action = null
+      if ('action' in sprite) sprite.action = 'up'
     })
-  const moveLeft = (uuid = myUUId) =>
-    move(sprites => {
+  const haveSpriteMoveLeft = (uuid: string) =>
+    editSprites(sprites => {
       const sprite = sprites[uuid]!
-      sprite.x--
-      if ('action' in sprite) sprite.action = null
+      if ('action' in sprite) sprite.action = 'left'
     })
-  const moveDown = (uuid = myUUId) =>
-    move(sprites => {
+  const haveSpriteMoveDown = (uuid: string) =>
+    editSprites(sprites => {
       const sprite = sprites[uuid]!
-      sprite.y++
-      if ('action' in sprite) sprite.action = null
+      if ('action' in sprite) sprite.action = 'down'
     })
-  const moveRight = (uuid = myUUId) =>
-    move(sprites => {
+  const haveSpriteMoveRight = (uuid: string) =>
+    editSprites(sprites => {
       const sprite = sprites[uuid]!
-      sprite.x++
-      if ('action' in sprite) sprite.action = null
+      if ('action' in sprite) sprite.action = 'right'
     })
 
   const [mapWidth, mapHeight] = useMemo(() => [8, 4], [])
@@ -263,16 +273,16 @@ function App() {
         haveSpriteTap(myUUId)
       },
       up() {
-        moveUp()
+        haveSpriteMoveUp(myUUId)
       },
       left() {
-        moveLeft()
+        haveSpriteMoveLeft(myUUId)
       },
       down() {
-        moveDown()
+        haveSpriteMoveDown(myUUId)
       },
       right() {
-        moveRight()
+        haveSpriteMoveRight(myUUId)
       },
     },
     [sprites],

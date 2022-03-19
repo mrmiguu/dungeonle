@@ -3,13 +3,15 @@ import { useEffect } from 'react'
 import create from 'zustand'
 import { ItemEmoji, NPCEmoji, PlayerEmoji, WarpEmoji } from './emojis'
 
+type SpriteAction = 'tap' | 'up' | 'left' | 'down' | 'right'
+
 type PlayerSprite = {
   kind: 'player'
   emoji: PlayerEmoji
   x: number
   y: number
   hearts: number
-  action: 'tap' | null
+  action: SpriteAction | null
   items: Partial<{ [emoji in ItemEmoji]: number }>
 }
 
@@ -19,7 +21,7 @@ type NPCSprite = {
   x: number
   y: number
   hearts: number
-  action: 'tap' | null
+  action: SpriteAction | null
   items: Partial<{ [emoji in ItemEmoji]: number }>
 }
 
