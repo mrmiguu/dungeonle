@@ -197,11 +197,14 @@ const npcEmojis = [
   '🔒',
 ] as const
 
-const emojis = [...playerEmojis, ...itemEmojis, ...npcEmojis] as const
+const warpEmojis = ['🚪', '🕳', '🪞', '🌐', '♨️', '🌪', '🔥', '✨'] as const
+
+const emojis = [...playerEmojis, ...itemEmojis, ...npcEmojis, ...warpEmojis] as const
 
 type PlayerEmoji = typeof playerEmojis[number]
 type ItemEmoji = typeof itemEmojis[number]
 type NPCEmoji = typeof npcEmojis[number]
+type WarpEmoji = typeof warpEmojis[number]
 type Emoji = typeof emojis[number]
 
 const faceOverrides: Partial<{
@@ -293,5 +296,5 @@ const mapItemOverrides: Partial<{
 type FaceOverride = keyof typeof faceOverrides
 type MapItemOverride = keyof typeof mapItemOverrides
 
-export type { PlayerEmoji, ItemEmoji, NPCEmoji, Emoji, FaceOverride, MapItemOverrideProps, MapItemOverride }
+export type { PlayerEmoji, ItemEmoji, NPCEmoji, WarpEmoji, Emoji, FaceOverride, MapItemOverrideProps, MapItemOverride }
 export { openmoji_svg_color, emojis, faceOverrides, mapItemOverrides }

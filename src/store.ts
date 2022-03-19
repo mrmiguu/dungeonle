@@ -1,7 +1,7 @@
 import produce from 'immer'
 import { useEffect } from 'react'
 import create from 'zustand'
-import { ItemEmoji, NPCEmoji, PlayerEmoji } from './emojis'
+import { ItemEmoji, NPCEmoji, PlayerEmoji, WarpEmoji } from './emojis'
 
 type PlayerSprite = {
   kind: 'player'
@@ -10,6 +10,7 @@ type PlayerSprite = {
   y: number
   hearts: number
   action: 'tap' | null
+  warped: boolean
   items: Partial<{ [emoji in ItemEmoji]: number }>
 }
 
@@ -20,6 +21,7 @@ type NPCSprite = {
   y: number
   hearts: number
   action: 'tap' | null
+  warped: boolean
   items: Partial<{ [emoji in ItemEmoji]: number }>
 }
 
@@ -37,7 +39,15 @@ type ChestSprite = {
   y: number
 }
 
-type Sprite = PlayerSprite | NPCSprite | ItemSprite | ChestSprite
+type WarpSprite = {
+  kind: 'warp'
+  emoji: WarpEmoji
+  x: number
+  y: number
+  to: number
+}
+
+type Sprite = PlayerSprite | NPCSprite | ItemSprite | ChestSprite | WarpSprite
 
 type SpriteMap = { [uuid: string]: Sprite }
 

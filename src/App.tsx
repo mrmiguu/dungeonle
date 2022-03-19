@@ -9,7 +9,7 @@ import EmojiNPC from './EmojiNPC'
 import EmojiPlayer from './EmojiPlayer'
 import { ItemEmoji, mapItemOverrides } from './emojis'
 import EmojiStatic from './EmojiStatic'
-import { drawMap, getRawMap, getRawTile, tiles } from './maps'
+import { drawMap, findTiles, getRawMap, getRawTile, tiles } from './maps'
 import { mapSpritesToTiles } from './mapSprites'
 import { music_imports, useMusic } from './music'
 import { random } from './random'
@@ -76,8 +76,9 @@ function App() {
           items: { '❤️': 3, '🪙': 2 },
           hearts: 5000 * 20 * 5,
         })),
+        ...mapSpritesToTiles(rawMap, tiles.warp, ({ i, n }) => ({ emoji: '🌐', kind: 'warp', to: (i + 1) % n })),
         ...mapSpritesToTiles(rawMap, tiles.coin, () => ({ emoji: '🪙', kind: 'item' })),
-        ...mapSpritesToTiles(rawMap, tiles.chest, (x, y, i) => ({ emoji: i === 0 ? '🗺️' : '🧭', kind: 'chest' })),
+        ...mapSpritesToTiles(rawMap, tiles.chest, ({ i }) => ({ emoji: i === 0 ? '🗺️' : '🧭', kind: 'chest' })),
       }),
     [myUUId, rawMap],
   )
@@ -112,10 +113,14 @@ function App() {
       const objectIsCharacter = object.kind === 'player' || object.kind === 'npc'
       const objectIsChest = object.kind === 'chest'
       const objectIsItem = object.kind === 'item'
+      const objectIsWarp = object.kind === 'warp'
 
       const pickingUp = subjectIsCharacter && objectIsItem && !isSelf
       const openingChest = subjectIsCharacter && subjectIsTapping && objectIsChest && !isSelf
       const attackingCharacter = subjectIsCharacter && subjectIsTapping && objectIsCharacter && !isSelf
+      const standingOnWarp = subjectIsCharacter && objectIsWarp && !isSelf
+      const notStandingOnWarp = subjectIsCharacter && !objectIsWarp && !isSelf
+      const warping = standingOnWarp && !subject.warped
 
       if (pickingUp) {
         const { sound, animationDuration } = mapItemOverrides[object.emoji] ?? {}
@@ -192,6 +197,17 @@ function App() {
         }
 
         subject.action = null
+      }
+
+      if (warping) {
+        const [toX, toY] = findTiles(tiles.warp, rawMap)[object.to]!
+        subject.warped = true
+        subject.x = toX
+        subject.y = toY
+      }
+
+      if (notStandingOnWarp) {
+        subject.warped = false
       }
     })
   }
@@ -273,6 +289,7 @@ function App() {
     <div className="absolute top-0 left-0 w-full h-full">
       {entries(sprites).map(([uuid, { emoji, x, y, kind }]) => {
         const isCharacter = kind === 'player' || kind === 'npc'
+        const isFlat = kind === 'warp'
 
         return (
           <div
@@ -281,7 +298,7 @@ function App() {
             style={{
               ...styleSpriteTile,
               transform: `translate(${100 * x}%,${100 * y}%)`,
-              zIndex: y * 2 + (isCharacter ? 1 : 0),
+              zIndex: isFlat ? 0 : y * 2 + (isCharacter ? 1 : 0),
             }}
           >
             <div className="flex items-center justify-center">
@@ -310,6 +327,7 @@ function App() {
               {kind === 'chest' && (
                 <EmojiMapItem emoji="📦" className="absolute w-full h-full" animation="animate-none" scale={0.75} />
               )}
+              {kind === 'warp' && <EmojiStatic emoji={emoji} className="absolute w-full h-full" />}
             </div>
           </div>
         )
