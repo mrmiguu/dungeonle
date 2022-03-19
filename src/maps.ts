@@ -53,7 +53,7 @@ function getRawMap<W extends number, H extends number>(width: W, height: H): Map
     '⬛️⬛️⬛️⬜️🟩⬜️⬜️⬜️🟨⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️',
     '⬛️⬛️⬛️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️',
     '⬛️⬛️⬛️⬛️⬜️🟪⬜️⬜️⬜️⬛️⬛️⬛️⬛️⬜️⬜️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️',
-    '⬛️⬛️⬛️⬛️⬛️⬜️⬜️⬜️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️',
+    '⬛️⬛️⬛️⬛️⬛️🟦⬜️⬜️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️',
   ] as JSONMap<H>)
   return generateCellularAutomaton({ width, height, whiteLevel: 0.5, seed: `dungeonle-${1}` })
 }

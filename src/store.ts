@@ -10,7 +10,6 @@ type PlayerSprite = {
   y: number
   hearts: number
   action: 'tap' | null
-  warped: boolean
   items: Partial<{ [emoji in ItemEmoji]: number }>
 }
 
@@ -21,7 +20,6 @@ type NPCSprite = {
   y: number
   hearts: number
   action: 'tap' | null
-  warped: boolean
   items: Partial<{ [emoji in ItemEmoji]: number }>
 }
 

@@ -1,6 +1,7 @@
 import immer from 'immer'
 import { CSSProperties, useEffect, useMemo, useState } from 'react'
 import toast, { Toaster } from 'react-hot-toast'
+import Particles from 'react-tsparticles'
 import { v4 as uuid4 } from 'uuid'
 import { useInput } from './appHooks'
 import Camera from './Camera'
@@ -118,9 +119,7 @@ function App() {
       const pickingUp = subjectIsCharacter && objectIsItem && !isSelf
       const openingChest = subjectIsCharacter && subjectIsTapping && objectIsChest && !isSelf
       const attackingCharacter = subjectIsCharacter && subjectIsTapping && objectIsCharacter && !isSelf
-      const standingOnWarp = subjectIsCharacter && objectIsWarp && !isSelf
-      const notStandingOnWarp = subjectIsCharacter && !objectIsWarp && !isSelf
-      const warping = standingOnWarp && !subject.warped
+      const warping = subjectIsCharacter && objectIsWarp && subjectIsTapping && !isSelf
 
       if (pickingUp) {
         const { sound, animationDuration } = mapItemOverrides[object.emoji] ?? {}
@@ -200,14 +199,13 @@ function App() {
       }
 
       if (warping) {
+        playSound('warp.wav')
+
         const [toX, toY] = findTiles(tiles.warp, rawMap)[object.to]!
-        subject.warped = true
+
+        subject.action = null
         subject.x = toX
         subject.y = toY
-      }
-
-      if (notStandingOnWarp) {
-        subject.warped = false
       }
     })
   }
@@ -327,7 +325,49 @@ function App() {
               {kind === 'chest' && (
                 <EmojiMapItem emoji="📦" className="absolute w-full h-full" animation="animate-none" scale={0.75} />
               )}
-              {kind === 'warp' && <EmojiStatic emoji={emoji} className="absolute w-full h-full" />}
+              {kind === 'warp' && (
+                <>
+                  <EmojiStatic emoji={emoji} className="absolute w-full h-full" />
+                  <Particles
+                    id={`warp-${x}-${y}`}
+                    options={{
+                      fpsLimit: 120,
+                      particles: {
+                        color: {
+                          value: '#ffffff',
+                        },
+                        move: {
+                          direction: 'top',
+                          enable: true,
+                          outMode: 'out',
+                          random: false,
+                          speed: 2,
+                          straight: false,
+                          size: true,
+                        },
+                        number: {
+                          density: {
+                            enable: true,
+                            area: 400,
+                          },
+                          value: 80,
+                        },
+                        opacity: {
+                          value: 0.5,
+                        },
+                        shape: {
+                          type: 'circle',
+                        },
+                        size: {
+                          random: true,
+                          value: 7,
+                        },
+                      },
+                      detectRetina: true,
+                    }}
+                  />
+                </>
+              )}
             </div>
           </div>
         )
