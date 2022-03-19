@@ -22,8 +22,8 @@ type JSONMap<H extends number> = Tuple<string, H>
 
 function findTiles<W extends number, H extends number>(tile: Tile, map: Map<W, H>): [number, number][] {
   return map.reduce<[number, number][]>((pool, row, y) => {
-    const x = row.indexOf(tile)
-    if (x !== -1) pool.push([x, y])
+    const xs = row.reduce<number[]>((indices, t, i) => [...indices, ...(t === tile ? [i] : [])], [])
+    for (const x of xs) pool.push([x, y])
     return pool
   }, [])
 }
@@ -53,7 +53,7 @@ function getRawMap<W extends number, H extends number>(width: W, height: H): Map
     '⬛️⬛️⬛️⬜️🟩⬜️⬜️⬜️🟨⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️',
     '⬛️⬛️⬛️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️',
     '⬛️⬛️⬛️⬛️⬜️🟪⬜️⬜️⬜️⬛️⬛️⬛️⬛️⬜️⬜️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️',
-    '⬛️⬛️⬛️⬛️⬛️🟦⬜️⬜️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️',
+    '⬛️⬛️⬛️⬛️⬛️⬜️⬜️⬜️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️⬛️',
   ] as JSONMap<H>)
   return generateCellularAutomaton({ width, height, whiteLevel: 0.5, seed: `dungeonle-${1}` })
 }
