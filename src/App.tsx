@@ -314,7 +314,15 @@ function App() {
           <div
             key={`${x}`}
             className={`relative flex items-center justify-center w-full h-full shrink-0 ${
-              tr ? 'rounded-tr-full' : br ? 'rounded-br-full' : bl ? 'rounded-bl-full' : tl ? 'rounded-tl-full' : null
+              tr
+                ? 'rounded-tr-[25%]'
+                : br
+                ? 'rounded-br-[25%]'
+                : bl
+                ? 'rounded-bl-[25%]'
+                : tl
+                ? 'rounded-tl-[25%]'
+                : null
             } ${isTile ? (isEven ? 'bg-green-400' : 'bg-green-500') : 'bg-transparent'}`}
           >
             <div className="flex items-end justify-center">{/* TODO: add static tile things here */}</div>
