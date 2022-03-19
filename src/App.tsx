@@ -9,7 +9,8 @@ import EmojiNPC from './EmojiNPC'
 import EmojiPlayer from './EmojiPlayer'
 import { ItemEmoji, mapItemOverrides } from './emojis'
 import EmojiStatic from './EmojiStatic'
-import { drawMap, getRawMap, getRawTile } from './maps'
+import { drawMap, getRawMap, getRawTile, tiles } from './maps'
+import { mapSpritesToTiles } from './mapSprites'
 import { music_imports, useMusic } from './music'
 import { random } from './random'
 import { playSound } from './sounds'
@@ -46,18 +47,39 @@ function App() {
   useEffect(
     () =>
       void setSprites({
-        [myUUId]: { emoji: '😎', x: 0, y: 0, kind: 'player', action: null, items: {}, hearts: 10000 },
-        [uuid4()]: { emoji: '🍎', x: 1, y: 1, kind: 'npc', action: null, items: { '❤️': 1, '🪙': 2 }, hearts: 5000 },
-        [uuid4()]: { emoji: '🪙', x: 1, y: 2, kind: 'item' },
-        [uuid4()]: { emoji: '🪙', x: 2, y: 1, kind: 'item' },
-        [uuid4()]: { emoji: '🪙', x: 3, y: 2, kind: 'item' },
-        [uuid4()]: { emoji: '🪙', x: 4, y: 1, kind: 'item' },
-        [uuid4()]: { emoji: '🪙', x: 5, y: 2, kind: 'item' },
-        [uuid4()]: { emoji: '🪙', x: 6, y: 1, kind: 'item' },
-        [uuid4()]: { emoji: '🗺️', x: 3, y: 0, kind: 'chest' },
-        [uuid4()]: { emoji: '🧭', x: 0, y: 1, kind: 'chest' },
+        ...mapSpritesToTiles(rawMap, tiles.player, () => ({
+          uuid: myUUId,
+          emoji: '😎',
+          kind: 'player',
+          action: null,
+          items: {},
+          hearts: 10000,
+        })),
+        ...mapSpritesToTiles(rawMap, tiles.monster, () => ({
+          emoji: '🍎',
+          kind: 'npc',
+          action: null,
+          items: { '❤️': 1 },
+          hearts: 5000,
+        })),
+        ...mapSpritesToTiles(rawMap, tiles.miniboss, () => ({
+          emoji: '🌲',
+          kind: 'npc',
+          action: null,
+          items: { '❤️': 2, '🪙': 1 },
+          hearts: 5000 * 20,
+        })),
+        ...mapSpritesToTiles(rawMap, tiles.boss, () => ({
+          emoji: '🍍',
+          kind: 'npc',
+          action: null,
+          items: { '❤️': 3, '🪙': 2 },
+          hearts: 5000 * 20 * 5,
+        })),
+        ...mapSpritesToTiles(rawMap, tiles.coin, () => ({ emoji: '🪙', kind: 'item' })),
+        ...mapSpritesToTiles(rawMap, tiles.chest, (x, y, i) => ({ emoji: i === 0 ? '🗺️' : '🧭', kind: 'chest' })),
       }),
-    [myUUId],
+    [myUUId, rawMap],
   )
 
   function editSprites(on: (sprites: SpriteMap) => void) {
@@ -303,7 +325,7 @@ function App() {
   const elTilesV2 = rawMap.map((row, y) => (
     <div key={`${y}`} className="flex" style={styleTileRow}>
       {row.map((cell, x) => {
-        const isTile = cell === '⬜️'
+        const isTile = cell !== '⬛️'
         const tr = isTile && getRawTile(rawMap, x + 1, y) === '⬛️' && getRawTile(rawMap, x, y - 1) === '⬛️'
         const br = isTile && getRawTile(rawMap, x + 1, y) === '⬛️' && getRawTile(rawMap, x, y + 1) === '⬛️'
         const bl = isTile && getRawTile(rawMap, x - 1, y) === '⬛️' && getRawTile(rawMap, x, y + 1) === '⬛️'

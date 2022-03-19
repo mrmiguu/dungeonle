@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "geopattern": "^1.2.3",
+    "grapheme-splitter": "^1.0.4",
     "howler": "^2.2.3",
     "immer": "^9.0.12",
     "react": "^17.0.2",

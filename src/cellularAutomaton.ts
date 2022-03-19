@@ -97,5 +97,5 @@ function generateCellularAutomaton<W extends number, H extends number>({
   return currentMatrix
 }
 
-export type { Cell }
+export type { Cell, Row, Matrix }
 export { cells, generateCellularAutomaton, generateWhiteNoise, drawMatrix }
